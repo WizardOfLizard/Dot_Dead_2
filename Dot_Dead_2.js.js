@@ -11,7 +11,10 @@ let bulletSpeed = 7
 
 let playerSpeed = 5
 
-let enemySpeed = 3
+let enemySpeed = 3//let enemySpeed = []
+let enemyReload = []
+let enemyHealth = []
+let enemyDamage = []
 
 //Counts how many waves have been sent on player, used for difficulty and score
 let waveNum = 1
@@ -19,16 +22,24 @@ let waveNum = 1
 let highScore = 0
 
 //stores all data on the player
-//postion(x, y), velocity(x, y), number of lives, and reload timer
-let player = {x:300, y:300, xVel:0, yVel:0, lives:3, bulletTimer:0, iFrames: 0}
+//postion(x, y), velocity(x, y), health, gun type, reload timer, and invulnerability frames
+let player = {x:300, y:300, xVel:0, yVel:0, lives: 3, health:100, bulletTimer:0, iFrames: 0}
 
-//enemies contains the positions, states, bullet timers, and statuses of all enemies
-//Format: {x:number, y:number, state:thinking/long/mid/short, bulletTimer:number, stat:alive/dead}
+//enemies contains the positions, states, bullet timers, health, statuses, and types of all enemies
+//Format: {x:number, y:number, state:unique by enemy, bulletTimer:number, health:number, stat:alive/dead, type:string}
 let enemies = []
 
-//bullets contains the positions, trajectories, affiliations, and statuses of all bullets
-//Format: {x:number, y:number, ang:number(angle), afil:friend/foe, stat:live/dead}
+//bullets contains the positions, trajectories, affiliations, statuses, and types of all bullets
+//Format: {x:number, y:number, ang:number(angle), afil:friend/foe, stat:live/dead, type:string}
 let bullets = []
+
+//seekers contains the positions, directions, affiliations, statuses, and types of all seekers
+//Format: {x:number, y:number, ang:number(angle), afil:friend/foe, stat:live/dead, type:string
+let seekers = []
+
+//lasers contains the start points, angles, affiliations, statuses, and types of all lasers
+//Format: {startX:number, startY:number, ang:number(angle), afil:friend/foe, stat:live/dead, type:string
+let lasers = []
 
 //calculates angle between two points. range[3pi/2, -pi/2)
 function calcAngle (p1x, p1y, p2x, p2y) {
