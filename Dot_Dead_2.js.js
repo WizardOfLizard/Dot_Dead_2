@@ -123,7 +123,7 @@ function trimBullets () {
 
 //spawns enemies with according attributes
 function spawnEnemy (xPos, yPos, eType) {
-    enemies.push({x: xPos, y: yPos, state: "thinking", bulletTimer: enemyReload[eType], health: enemyHealth[eType],stat: "alive", type: eType, threat: enemyThreat[eType]})
+    enemies.push({x: xPos, y: yPos, state: "thinking", bulletTimer: enemyReload[eType], health: enemyHealth[eType],stat: "alive", type: eType, threat: enemyThreat[eType], rangeFloor: 0, rangeCeiling: 999})
     console.log(`Enemy spawned @ (${xPos}, ${yPos})`)
 }
 
@@ -134,36 +134,49 @@ function spawnBullet (xPos, yPos, angle, affili, bType) {
 }
 
 function spawnWave (wave, level) {
-    let newSpawns = []
-    let spawnNum = 1
-    if (wave === 1) {
-        spawnNum = 1
-    } else if (wave >= 2 && wave <= 3) {
-        spawnNum = 2
-    } else if (wave > 3 && wave <= 5) {
-        spawnNum = 3
-    } else if (wave > 5 && wave <= 7) {
-        spawnNum = 4
-    } else if (wave > 7 && wave <= 12) {
-        spawnNum = 5
-    } else if (wave > 12 && wave <= 20) {
-        spawnNum = 6
-    } else {
-        spawnNum = 7
+    if (level === 0) {
+        if (wave === 1) {
+            spawnGroup(1, 0)
+        } else if (wave === 2) {
+            spawnGroup(2, 0)
+        } else if (wave === 3) {
+            spawnGroup(1, 0)
+            spawnGroup(1, 1)
+        } else if (wave === 4) {
+            spawnGroup(2, 0)
+            spawnGroup(2, 1)
+        } else if (wave === 5) {
+            spawnGroup(3, 0)
+            spawnGroup(2, 1)
+        }
+    } else if (level === 1) {
+
+    } else if (level === 2) {
+
+    } else if (level === 3) {
+
+    } else if (level === 4) {
+
+    } else if (level === 5) {
+
     }
-    for (i = 0;i < spawnNum;i ++) {
+}
+
+//spawns a given number of a given type of enemy
+function spawnGroup (num, type) {
+    let newSpawns = []
+    for (i = 0;i < num;i ++) {
         newSpawns.push({x: 300, y: 300})
     }
-    for (i = 0;i < spawnNum;i ++) {
+    for (i = 0;i < num;i ++) {
         newSpawns[i] = {x: Math.round(Math.random()*500 + 50), y: Math.round(Math.random()*500 + 50)}
         if (calcDist(newSpawns[i].x, newSpawns[i].y, player.x, player.y) < 75) {
             i --
         }
     }
     newSpawns.forEach(spawn => {
-        spawnEnemy(spawn.x, spawn.y, 0)
+        spawnEnemy(spawn.x, spawn.y, type)
     })
-    console.log(`New wave spawned: ${waveNum}`)
 }
 
 //draws player
@@ -189,8 +202,13 @@ function drawPlayer () {
 function drawEnemies () {
     if (enemies.length >= 1) {
         noStroke()
-        fill(224 - waveNum*10, 54 - waveNum*20, 54 - waveNum*20)
+        fill(224, 54, 54)
         enemies.forEach(enemy => {
+            if (enemy.type === 0) {
+                fill(224, 54, 54)
+            } else if (enemy.type === 1) {
+                fill(219, 219, 22)
+            }
             if (enemy.stat === "alive") {
                 ellipse(enemy.x, enemy.y, 25, 25)
             }
@@ -311,15 +329,18 @@ function accPlayer () {
 
 function enemiesThink () {
     enemies.forEach(enemy => {
-        if (enemy.state === "thinking") {
+        if (enemy.state === "thinking" && enemy.type === 0) {
             let decide = Math.round(Math.random(1, 3))
             if (decide === 1) {
-                enemy.state = "short"
+                enemy.state = "move0A"
             } else if (decide === 2) {
-                enemy.state = "mid"
+                enemy.state = "move0B"
             } else {
-                enemy.state = "long"
+                enemy.state = "move0C"
             }
+        }
+        if (enemy.state === "thinking" && enemy.type === 1) {
+            enemy.state = "move1"
         }
     })
 }
@@ -329,6 +350,7 @@ function enemiesShoot () {
         if (enemy.bulletTimer <= 0 &&  gameRunning) {
             spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y), "foe", enemy.type)
             enemy.bulletTimer = enemyReload[enemy.type] + Math.round(Math.random()*enemyReload[enemy.type])
+            enemy.state = "thinking"
         }
     })
 }
@@ -357,20 +379,22 @@ function movePlayer () {
 
 function moveEnemies () {
     enemies.forEach(enemy => {
-        let rangeFloor
-        let rangeCeiling
-        if (enemy.state === "short") {
-            rangeFloor = 50
-            rangeCeiling = 150
-        } else if (enemy.state === "mid") {
-            rangeFloor = 150
-            rangeCeiling = 250
-        } else if (enemy.state === "long") {
-            rangeFloor = 250
-            rangeCeiling = 400
+        if (enemy.state === "move0A") {
+            enemy.rangeFloor = 200
+            enemy.rangeCeiling = 300
+        } else if (enemy.state === "move0B") {
+            enemy.rangeFloor = 125
+            enemy.rangeCeiling = 225
+        } else if (enemy.state === "move0C") {
+            enemy.rangeFloor = 275
+            enemy.rangeCeiling = 375
+        }
+        if (enemy.state === "move1") {
+            enemy.rangeFloor = 100
+            enemy.rangeCeiling = 200
         }
         //moves enemy closer if player leaves ideal range
-        if (calcDist(enemy.x, enemy.y, player.x, player.y) > rangeCeiling) {
+        if (calcDist(enemy.x, enemy.y, player.x, player.y) > enemy.rangeCeiling) {
             if (enemy.x < player.x) {
                 enemy.x += enemySpeed[enemy.type]
             }
@@ -385,7 +409,7 @@ function moveEnemies () {
             }
         }
         // moves enemy back if player comes too close
-        if (calcDist(enemy.x, enemy.y, player.x, player.y) < rangeFloor) {
+        if (calcDist(enemy.x, enemy.y, player.x, player.y) < enemy.rangeFloor) {
             if (enemy.x < player.x && enemy.x > 50) {
                 enemy.x -= enemySpeed[enemy.type]
             }
@@ -468,12 +492,16 @@ function passRumble () {
 
 function checkNextWave () {
     if (gameLevel === 0) {
-        if(level0Trans[waveNum-1].type === "all") {
+        if (level0Trans[waveNum-1] === undefined) {
+            if (enemies.length <= 0) {
+                console.log("All enemies of level defeated.")
+            }
+        } else if(level0Trans[waveNum-1].type === "all") {
             if (enemies.length <= level0Trans[waveNum-1].num) {
                 waveNum ++
                 spawnWave(waveNum, gameLevel)
             }
-        } else {
+        }  else {
             if (eTypeCount[level0Trans[waveNum-1].type] <= level0Trans[waveNum-1].num) {
                 waveNum ++
                 spawnWave(waveNum, gameLevel)
