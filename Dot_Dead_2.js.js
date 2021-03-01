@@ -6,6 +6,8 @@ let gameState = 0
 
 let gameLevel = 0
 
+let changeDelay = 0
+
 //Lists the wave transitions for each level
 //Each item in array is a single wave transition
 //type:number/"all" (represents the type of enemy it is counting before next transition)
@@ -16,6 +18,9 @@ let level2Trans = []
 let level3Trans = []
 let level4Trans = []
 let level5Trans = []
+
+//lists the levels you have defeated
+let defeated = [false, false, false, false, false, false]
 
 //variables for design
 let bulletSpeed = 7
@@ -32,6 +37,11 @@ let enemyBulletDamage = [20, 25]
 
 //visual variables
 let rumble = 0
+
+let textShift = 0
+let textDrift = 0.5
+
+let bright = 0
 
 //Counts how many waves have been sent on player, used for difficulty and score
 let waveNum = 1
@@ -288,6 +298,41 @@ function drawUI () {
     }
 }
 
+function drawMenu () {
+    if (gameState === 0) {
+        background(27, 81, 207)
+        textAlign(CENTER, CENTER)
+        textSize(50)
+        fill(0, 0, 0)
+        text("Dot Dead 2", 300, 100 + textShift)
+        textSize(15)
+        text("Daniel L. Hensler", 300, 140 + textShift)
+        strokeWeight(5)
+        stroke(0, 0, 0)
+        fill(67, 219, 11)
+        if (calcDist(mouseX, mouseY, 300, 300) <= 37) {
+            stroke(255, 255, 255)
+            fill(186, 15, 15)
+        }
+        ellipse(300, 300, 75, 75)
+        strokeWeight(3)
+        fill(251, 255, 0)
+        if (calcDist(mouseX, mouseY, 300, 300) <= 37) {
+            stroke(255, 255, 255)
+            fill(0, 0, 0)
+        }
+        triangle(285, 285, 285, 315, 325, 300)
+        if (calcDist(mouseX, mouseY, 300, 300) <= 37 && mouseIsPressed) {
+            rumble = 5
+            gameState = 1
+            gameRunning = true
+            changeDelay = 25
+            spawnWave(waveNum, gameLevel)
+        }
+    }
+    fill(255, 255, 255, 2*bright)
+}
+
 function accPlayer () {
     //governs UP and W keys
     if (player.yVel > -playerSpeed && keyIsDown(87)) {
@@ -345,6 +390,16 @@ function enemiesThink () {
     })
 }
 
+function driftText () {
+    textShift += textDrift
+    if (textShift > 0) {
+        textDrift -= 0.01
+    }
+    if (textShift < 0) {
+        textDrift += 0.01
+    }
+}
+
 function enemiesShoot () {
     enemies.forEach(enemy => {
         if (enemy.bulletTimer <= 0 &&  gameRunning) {
@@ -357,73 +412,77 @@ function enemiesShoot () {
 
 //self explainitory
 function movePlayer () {
-    player.x += player.xVel
-    player.y += player.yVel
-    if (player.x < 15) {
-        player.xVel = 0
-        player.x = 15
-    }
-    if (player.x > 585) {
-        player.xVel = 0
-        player.x = 585
-    }
-    if (player.y < 15) {
-        player.yVel = 0
-        player.y = 15
-    }
-    if (player.y > 585) {
-        player.yVel = 0
-        player.y = 585
+    if (changeDelay <= 0) {
+        player.x += player.xVel
+        player.y += player.yVel
+        if (player.x < 15) {
+            player.xVel = 0
+            player.x = 15
+        }
+        if (player.x > 585) {
+            player.xVel = 0
+            player.x = 585
+        }
+        if (player.y < 15) {
+            player.yVel = 0
+            player.y = 15
+        }
+        if (player.y > 585) {
+            player.yVel = 0
+            player.y = 585
+        }
     }
 }
 
 function moveEnemies () {
-    enemies.forEach(enemy => {
-        if (enemy.state === "move0A") {
-            enemy.rangeFloor = 200
-            enemy.rangeCeiling = 300
-        } else if (enemy.state === "move0B") {
-            enemy.rangeFloor = 125
-            enemy.rangeCeiling = 225
-        } else if (enemy.state === "move0C") {
-            enemy.rangeFloor = 275
-            enemy.rangeCeiling = 375
-        }
-        if (enemy.state === "move1") {
-            enemy.rangeFloor = 100
-            enemy.rangeCeiling = 200
-        }
-        //moves enemy closer if player leaves ideal range
-        if (calcDist(enemy.x, enemy.y, player.x, player.y) > enemy.rangeCeiling) {
-            if (enemy.x < player.x) {
-                enemy.x += enemySpeed[enemy.type]
+    if (changeDelay <= 0) {
+        enemies.forEach(enemy => {
+            if (enemy.state === "move0A") {
+                enemy.rangeFloor = 200
+                enemy.rangeCeiling = 300
+            } else if (enemy.state === "move0B") {
+                enemy.rangeFloor = 125
+                enemy.rangeCeiling = 225
+            } else if (enemy.state === "move0C") {
+                enemy.rangeFloor = 275
+                enemy.rangeCeiling = 375
             }
-            if (enemy.x > player.x) {
-                enemy.x -= enemySpeed[enemy.type]
+            if (enemy.state === "move1") {
+                enemy.rangeFloor = 100
+                enemy.rangeCeiling = 200
             }
-            if (enemy.y < player.y) {
-                enemy.y += enemySpeed[enemy.type]
+            //moves enemy closer if player leaves ideal range
+            if (calcDist(enemy.x, enemy.y, player.x, player.y) > enemy.rangeCeiling) {
+                if (enemy.x < player.x) {
+                    enemy.x += enemySpeed[enemy.type]
+                }
+                if (enemy.x > player.x) {
+                    enemy.x -= enemySpeed[enemy.type]
+                }
+                if (enemy.y < player.y) {
+                    enemy.y += enemySpeed[enemy.type]
+                }
+                if (enemy.y > player.y) {
+                    enemy.y -= enemySpeed[enemy.type]
+                }
             }
-            if (enemy.y > player.y) {
-                enemy.y -= enemySpeed[enemy.type]
+            // moves enemy back if player comes too close
+            if (calcDist(enemy.x, enemy.y, player.x, player.y) < enemy.rangeFloor) {
+                if (enemy.x < player.x && enemy.x > 50) {
+                    enemy.x -= enemySpeed[enemy.type]
+                }
+                if (enemy.x > player.x && enemy.x < 550) {
+                    enemy.x += enemySpeed[enemy.type]
+                }
+                if (enemy.y < player.y && enemy.y > 50) {
+                    enemy.y -= enemySpeed[enemy.type]
+                }
+                if (enemy.y > player.y && enemy.y < 550) {
+                    enemy.y += enemySpeed[enemy.type]
+                }
             }
-        }
-        // moves enemy back if player comes too close
-        if (calcDist(enemy.x, enemy.y, player.x, player.y) < enemy.rangeFloor) {
-            if (enemy.x < player.x && enemy.x > 50) {
-                enemy.x -= enemySpeed[enemy.type]
-            }
-            if (enemy.x > player.x && enemy.x < 550) {
-                enemy.x += enemySpeed[enemy.type]
-            }
-            if (enemy.y < player.y && enemy.y > 50) {
-                enemy.y -= enemySpeed[enemy.type]
-            }
-            if (enemy.y > player.y && enemy.y < 550) {
-                enemy.y += enemySpeed[enemy.type]
-            }
-        }
-    })
+        })
+    }
 }
 
 function moveBullets () {
@@ -491,27 +550,60 @@ function passRumble () {
 }
 
 function checkNextWave () {
-    if (gameLevel === 0) {
-        if (level0Trans[waveNum-1] === undefined) {
-            if (enemies.length <= 0) {
-                console.log("All enemies of level defeated.")
+    if (changeDelay <= 0) {
+        if (gameLevel === 0) {
+            if (level0Trans[waveNum-1] === undefined) {
+                if (enemies.length <= 0) {
+                    defeated[gameLevel] = true
+                    restart()
+                }
+            } else if(level0Trans[waveNum-1].type === "all") {
+                if (enemies.length <= level0Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
+            }  else {
+                if (eTypeCount[level0Trans[waveNum-1].type] <= level0Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
             }
-        } else if(level0Trans[waveNum-1].type === "all") {
-            if (enemies.length <= level0Trans[waveNum-1].num) {
-                waveNum ++
-                spawnWave(waveNum, gameLevel)
+        } else if (gameLevel === 1) {
+            if (level1Trans[waveNum-1] === undefined) {
+                if (enemies.length <= 0) {
+                    console.log("All enemies of level defeated.")
+                }
+            } else if(level1Trans[waveNum-1].type === "all") {
+                if (enemies.length <= level1Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
+            }  else {
+                if (eTypeCount[level1Trans[waveNum-1].type] <= level1Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
             }
-        }  else {
-            if (eTypeCount[level0Trans[waveNum-1].type] <= level0Trans[waveNum-1].num) {
-                waveNum ++
-                spawnWave(waveNum, gameLevel)
+        } else if (gameLevel === 2) {
+            if (level2Trans[waveNum-1] === undefined) {
+                if (enemies.length <= 0) {
+                    console.log("All enemies of level defeated.")
+                }
+            } else if(level2Trans[waveNum-1].type === "all") {
+                if (enemies.length <= level2Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
+            }  else {
+                if (eTypeCount[level2Trans[waveNum-1].type] <= level2Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
             }
+        } else if (gameLevel === 3) {
+        } else if (gameLevel === 4) {
+        } else if (gameLevel === 5) {
         }
-    } else if (gameLevel === 1) {
-    } else if (gameLevel === 2) {
-    } else if (gameLevel === 3) {
-    } else if (gameLevel === 4) {
-    } else if (gameLevel === 5) {
     }
     updateETypeCount()
 }
@@ -558,16 +650,13 @@ function restart () {
     waveNum = 1
     enemies = []
     bullets = []
-    gameState = 1
-    gameRunning = true
-    spawnWave(waveNum, gameLevel)
+    gameState = 0
+    gameRunning = false
 }
 
 //Makes canvas and is useful for debugging
 function setup () {
     createCanvas(600, 600)
-
-    spawnWave(waveNum, gameLevel)
     
 }
 
@@ -585,8 +674,11 @@ function draw () {
     drawPlayer()
 
     drawUI()
+    drawMenu()
 
     enemiesThink()
+
+    driftText()
 
     if (gameRunning === true) {
         accPlayer()
@@ -618,11 +710,13 @@ function draw () {
 
     trimBullets()
     trimEnemies()
+
+    changeDelay --
 }
 
 function keyTyped () {
     if (keyCode === 32) {
-        if (gameRunning === false && gameState < 2) {
+        if (gameRunning === false && gameState === 1) {
             gameRunning = true
             gameState = 1
         } else if (gameState === 2) {
@@ -635,7 +729,7 @@ function keyTyped () {
 
 //called when player clicks, spawns a bullet
 function playerShoot () {
-    if (player.bulletTimer < 1 && gameRunning && mouseIsPressed) {
+    if (player.bulletTimer < 1 && gameRunning && mouseIsPressed && changeDelay <= 0) {
         spawnBullet(player.x, player.y, calcAngle(player.x, player.y, mouseX, mouseY), "friend", player.gunType)
         player.bulletTimer = playerReload[player.gunType]
     }
