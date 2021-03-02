@@ -41,7 +41,10 @@ let rumble = 0
 let textShift = 0
 let textDrift = 0.5
 
+let isTransitioning = false
 let bright = 0
+let brightChange = 2
+let transTo = undefined
 
 //Counts how many waves have been sent on player, used for difficulty and score
 let waveNum = 1
@@ -322,15 +325,39 @@ function drawMenu () {
             fill(0, 0, 0)
         }
         triangle(285, 285, 285, 315, 325, 300)
-        if (calcDist(mouseX, mouseY, 300, 300) <= 37 && mouseIsPressed) {
-            rumble = 5
-            gameState = 1
-            gameRunning = true
-            changeDelay = 25
-            spawnWave(waveNum, gameLevel)
+        if (calcDist(mouseX, mouseY, 300, 300) <= 37 && mouseIsPressed && !isTransitioning) {
+            isTransitioning = true
+            transTo = 1
         }
     }
     fill(255, 255, 255, 2*bright)
+}
+
+function transitionScene () {
+    if (isTransitioning) {
+        noStroke()
+        fill(255, 255, 255, 2.5*bright)
+        rect(0, 0, 600, 600)
+        bright += brightChange
+        if (bright >= 100) {
+            brightChange = -2
+            if (transTo === 1) {
+                gameState = 1
+                gameRunning = true
+                changeDelay = 25
+                spawnWave(waveNum, gameLevel)
+                transTo = undefined
+            }
+            if (transTo === 0) {
+                restart()
+            }
+        }
+        if (bright <= 0 && brightChange === -2) {
+            bright = 0
+            brightChange = 2
+            isTransitioning = false
+        }
+    }
 }
 
 function accPlayer () {
@@ -402,7 +429,7 @@ function driftText () {
 
 function enemiesShoot () {
     enemies.forEach(enemy => {
-        if (enemy.bulletTimer <= 0 &&  gameRunning) {
+        if (enemy.bulletTimer <= 0 &&  gameRunning && !isTransitioning) {
             spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y), "foe", enemy.type)
             enemy.bulletTimer = enemyReload[enemy.type] + Math.round(Math.random()*enemyReload[enemy.type])
             enemy.state = "thinking"
@@ -412,7 +439,7 @@ function enemiesShoot () {
 
 //self explainitory
 function movePlayer () {
-    if (changeDelay <= 0) {
+    if (!isTransitioning || transTo === 0) {
         player.x += player.xVel
         player.y += player.yVel
         if (player.x < 15) {
@@ -435,7 +462,7 @@ function movePlayer () {
 }
 
 function moveEnemies () {
-    if (changeDelay <= 0) {
+    if (!isTransitioning) {
         enemies.forEach(enemy => {
             if (enemy.state === "move0A") {
                 enemy.rangeFloor = 200
@@ -530,9 +557,11 @@ function collideBullets () {
 
 function passBulletTimer () {
     player.bulletTimer --
-    enemies.forEach(enemy => {
-        enemy.bulletTimer --
-    })
+    if (!isTransitioning) {
+        enemies.forEach(enemy => {
+            enemy.bulletTimer --
+        })
+    }
 }
 
 function passPlayerIFrames () {
@@ -555,7 +584,8 @@ function checkNextWave () {
             if (level0Trans[waveNum-1] === undefined) {
                 if (enemies.length <= 0) {
                     defeated[gameLevel] = true
-                    restart()
+                    isTransitioning = true
+                    transTo = 0
                 }
             } else if(level0Trans[waveNum-1].type === "all") {
                 if (enemies.length <= level0Trans[waveNum-1].num) {
@@ -701,6 +731,8 @@ function draw () {
         checkNextWave()
     }
 
+    transitionScene()
+
     checkBulletBounds()
 
     checkPlayerHealth()
@@ -729,7 +761,7 @@ function keyTyped () {
 
 //called when player clicks, spawns a bullet
 function playerShoot () {
-    if (player.bulletTimer < 1 && gameRunning && mouseIsPressed && changeDelay <= 0) {
+    if (player.bulletTimer < 1 && gameRunning && mouseIsPressed && !isTransitioning) {
         spawnBullet(player.x, player.y, calcAngle(player.x, player.y, mouseX, mouseY), "friend", player.gunType)
         player.bulletTimer = playerReload[player.gunType]
     }
