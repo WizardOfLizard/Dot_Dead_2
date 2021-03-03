@@ -12,7 +12,7 @@ let changeDelay = 0
 //Each item in array is a single wave transition
 //type:number/"all" (represents the type of enemy it is counting before next transition)
 //num:int (number it must be or b lower than to start next wave)
-let level0Trans = [{type:"all", num:0}, {type:"all", num:0}, {type:"all", num:1}, {type:1, num:1}]
+let level0Trans = [{type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}]
 let level1Trans = []
 let level2Trans = []
 let level3Trans = []
@@ -29,11 +29,10 @@ let playerSpeed = 5
 let playerReload = [30, 5]
 let playerBulletDamage = [30, 5]
 
-let enemySpeed = [3, 6]
-let enemyReload = [55, 45]
-let enemyHealth = [30, 20]
-let enemyThreat = [1, 1]
-let enemyBulletDamage = [20, 25]
+let enemySpeed = [3, 6, 2, 3, 3, 2, 3]
+let enemyReload = [55, 35, 80, 60, 55, 65, 100]
+let enemyHealth = [30, 20, 40, 60, 80, 100, 40]
+let enemyBulletDamage = [20, 15, 35, 20, 20, 10, 40]
 
 //visual variables
 let rumble = 0
@@ -136,7 +135,7 @@ function trimBullets () {
 
 //spawns enemies with according attributes
 function spawnEnemy (xPos, yPos, eType) {
-    enemies.push({x: xPos, y: yPos, state: "thinking", bulletTimer: enemyReload[eType], health: enemyHealth[eType],stat: "alive", type: eType, threat: enemyThreat[eType], rangeFloor: 0, rangeCeiling: 999})
+    enemies.push({x: xPos, y: yPos, state: "thinking", bulletTimer: enemyReload[eType], health: enemyHealth[eType],stat: "alive", type: eType, rangeFloor: 0, rangeCeiling: 999})
     console.log(`Enemy spawned @ (${xPos}, ${yPos})`)
 }
 
@@ -151,16 +150,23 @@ function spawnWave (wave, level) {
         if (wave === 1) {
             spawnGroup(1, 0)
         } else if (wave === 2) {
-            spawnGroup(2, 0)
+            spawnGroup(1, 1)
         } else if (wave === 3) {
             spawnGroup(1, 0)
             spawnGroup(1, 1)
         } else if (wave === 4) {
+            spawnGroup(1, 2)
             spawnGroup(2, 0)
-            spawnGroup(2, 1)
         } else if (wave === 5) {
-            spawnGroup(3, 0)
-            spawnGroup(2, 1)
+            spawnGroup(2, 0)
+            spawnGroup(1, 3)
+        } else if (wave === 6) {
+            spawnGroup(3, 4)
+        } else if (wave === 7) {
+            spawnGroup(2, 5)
+            spawnGroup(2, 2)
+        } else if (wave === 8) {
+            spawnGroup(2, 6)
         }
     } else if (level === 1) {
 
@@ -217,13 +223,25 @@ function drawEnemies () {
         noStroke()
         fill(224, 54, 54)
         enemies.forEach(enemy => {
-            if (enemy.type === 0) {
+            if (enemy.type === 0 || enemy.type === 4) {
                 fill(224, 54, 54)
             } else if (enemy.type === 1) {
                 fill(219, 219, 22)
+            } else if (enemy.type === 2) {
+                fill(147, 20, 201)
+            } else if (enemy.type === 3) {
+                fill(247, 118, 5)
+            } else if (enemy.type === 5) {
+                fill(14, 41, 140)
+            } else if (enemy.type === 6) {
+                fill(10, 228, 252)
             }
             if (enemy.stat === "alive") {
                 ellipse(enemy.x, enemy.y, 25, 25)
+                if (enemy.type === 4) {
+                    fill (0, 0, 0, 100)
+                    ellipse(enemy.x, enemy.y, 30, 30)
+                }
             }
         })
     }
@@ -401,7 +419,7 @@ function accPlayer () {
 
 function enemiesThink () {
     enemies.forEach(enemy => {
-        if (enemy.state === "thinking" && enemy.type === 0) {
+        if (enemy.state === "thinking" && (enemy.type === 0 || enemy.type === 4)) {
             let decide = Math.round(Math.random(1, 3))
             if (decide === 1) {
                 enemy.state = "move0A"
@@ -412,7 +430,47 @@ function enemiesThink () {
             }
         }
         if (enemy.state === "thinking" && enemy.type === 1) {
-            enemy.state = "move1"
+            let decide = Math.round(Math.random(1, 3))
+            if (decide === 1) {
+                enemy.state = "move1A"
+            } else if (decide === 2) {
+                enemy.state = "move1B"
+            } else {
+                enemy.state = "move1C"
+            }
+        }
+        if (enemy.state === "thinking" && enemy.type === 2) {
+            let decide = Math.round(Math.random(1, 3))
+            if (decide === 1) {
+                enemy.state = "move2A"
+            } else if (decide === 2) {
+                enemy.state = "move2B"
+            } else {
+                enemy.state = "move2C"
+            }
+        }
+        if (enemy.state === "thinking" && enemy.type === 3) {
+            let decide = Math.round(Math.random(1, 3))
+            if (decide === 1) {
+                enemy.state = "move3A"
+            } else if (decide === 2) {
+                enemy.state = "move3B"
+            } else {
+                enemy.state = "move3C"
+            }
+        }
+        if (enemy.state === "thinking" && enemy.type === 5) {
+            enemy.state = "move5"
+        }
+        if (enemy.state === "thinking" && enemy.type === 6) {
+            let decide = Math.round(Math.random(1, 3))
+            if (decide === 1) {
+                enemy.state = "move6A"
+            } else if (decide === 2) {
+                enemy.state = "move6B"
+            } else {
+                enemy.state = "move6C"
+            }
         }
     })
 }
@@ -429,10 +487,40 @@ function driftText () {
 
 function enemiesShoot () {
     enemies.forEach(enemy => {
-        if (enemy.bulletTimer <= 0 &&  gameRunning && !isTransitioning) {
-            spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y), "foe", enemy.type)
+        if (enemy.bulletTimer <= 0 && gameRunning && !isTransitioning) {
+            if (enemy.type !== 6) {
+                spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y), "foe", enemy.type)
+            }
+            if (enemy.type === 3) {
+                spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) + Math.PI/6, "foe", enemy.type)
+                spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) - Math.PI/6, "foe", enemy.type)
+            }
             enemy.bulletTimer = enemyReload[enemy.type] + Math.round(Math.random()*enemyReload[enemy.type])
             enemy.state = "thinking"
+            if (enemy.type === 6) {
+                enemy.state = "exploding"
+                enemy.bulletTimer = enemyReload[enemy.type]
+            }
+        }
+        if (enemy.type === 6 && enemy.state === "exploding" && gameRunning && !isTransitioning) {
+            if (enemy.bulletTimer % 40 === 0) {
+                spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y), "foe", enemy.type)
+                spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) + Math.PI/3, "foe", enemy.type)
+                spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) - Math.PI/3, "foe", enemy.type)
+                spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) + 2 * Math.PI/3, "foe", enemy.type)
+                spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) - 2 * Math.PI/3, "foe", enemy.type)
+                spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) + Math.PI, "foe", enemy.type)
+            } else if (enemy.bulletTimer % 20 === 0) {
+                spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) + Math.PI/6, "foe", enemy.type)
+                spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) + Math.PI/3 + Math.PI/6, "foe", enemy.type)
+                spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) - Math.PI/3 + Math.PI/6, "foe", enemy.type)
+                spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) + 2 * Math.PI/3 + Math.PI/6, "foe", enemy.type)
+                spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) - 2 * Math.PI/3 + Math.PI/6, "foe", enemy.type)
+                spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) + Math.PI + Math.PI/6, "foe", enemy.type)
+            } else if (enemy.bulletTimer < 50) {
+                enemy.state = "thinking"
+                enemy.bulletTimer = enemyReload[enemy.type]
+            }
         }
     })
 }
@@ -474,9 +562,49 @@ function moveEnemies () {
                 enemy.rangeFloor = 275
                 enemy.rangeCeiling = 375
             }
-            if (enemy.state === "move1") {
+            if (enemy.state === "move1A") {
                 enemy.rangeFloor = 100
                 enemy.rangeCeiling = 200
+            } else if (enemy.state === "move1B") {
+                enemy.rangeFloor = 50
+                enemy.rangeCeiling = 150
+            } else if (enemy.state === "move1C") {
+                enemy.rangeFloor = 150
+                enemy.rangeCeiling = 250
+            }
+            if (enemy.state === "move2A") {
+                enemy.rangeFloor = 400
+                enemy.rangeCeiling = 500
+            } else if (enemy.state === "move2B") {
+                enemy.rangeFloor = 350
+                enemy.rangeCeiling = 450
+            } else if (enemy.state === "move2C") {
+                enemy.rangeFloor = 475
+                enemy.rangeCeiling = 575
+            }
+            if (enemy.state === "move3A") {
+                enemy.rangeFloor = 100
+                enemy.rangeCeiling = 125
+            } else if (enemy.state === "move3B") {
+                enemy.rangeFloor = 125
+                enemy.rangeCeiling = 150
+            } else if (enemy.state === "move3C") {
+                enemy.rangeFloor = 150
+                enemy.rangeCeiling = 175
+            }
+            if (enemy.state === "move5") {
+                enemy.rangeFloor = 100
+                enemy.rangeCeiling = 150
+            }
+            if (enemy.state === "move6A") {
+                enemy.rangeFloor = 150
+                enemy.rangeCeiling = 250
+            } else if (enemy.state === "move6B") {
+                enemy.rangeFloor = 250
+                enemy.rangeCeiling = 350
+            } else if (enemy.state === "move6C") {
+                enemy.rangeFloor = 450
+                enemy.rangeCeiling = 550
             }
             //moves enemy closer if player leaves ideal range
             if (calcDist(enemy.x, enemy.y, player.x, player.y) > enemy.rangeCeiling) {
@@ -514,8 +642,13 @@ function moveEnemies () {
 
 function moveBullets () {
     bullets.forEach(bullet => {
-        bullet.x += bulletSpeed*Math.cos(bullet.ang)
-        bullet.y += bulletSpeed*Math.sin(bullet.ang)
+        if (bullet.affil === "foe" && bullet.type === 6) {
+            bullet.x += bulletSpeed*Math.cos(bullet.ang)/2
+            bullet.y += bulletSpeed*Math.sin(bullet.ang)/2
+        } else {
+            bullet.x += bulletSpeed*Math.cos(bullet.ang)
+            bullet.y += bulletSpeed*Math.sin(bullet.ang)
+        }
     })
 }
 
