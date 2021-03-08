@@ -12,7 +12,7 @@ let changeDelay = 0
 //Each item in array is a single wave transition
 //type:number/"all" (represents the type of enemy it is counting before next transition)
 //num:int (number it must be or b lower than to start next wave)
-let level0Trans = [{type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}]
+let level0Trans = [{type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}]
 let level1Trans = []
 let level2Trans = []
 let level3Trans = []
@@ -23,16 +23,17 @@ let level5Trans = []
 let defeated = [false, false, false, false, false, false]
 
 //variables for design
-let bulletSpeed = 7
+let bulletSpeed = 6
 
 let playerSpeed = 5
-let playerReload = [30, 5]
-let playerBulletDamage = [30, 5]
+let playerReload = [30, 5, 55, 35, 60]
+let playerBulletDamage = [30, 5, 50, 20, 80]
 
-let enemySpeed = [3, 6, 2, 3, 3, 2, 3]
-let enemyReload = [55, 35, 80, 60, 55, 65, 100]
-let enemyHealth = [30, 20, 40, 60, 80, 100, 40]
-let enemyBulletDamage = [20, 15, 35, 20, 20, 10, 40]
+let enemySpeed = [3, 6, 2, 3, 3, 2, 3, 1]
+let enemyReload = [55, 35, 80, 60, 55, 65, 100, 80]
+let enemyHealth = [30, 20, 40, 60, 80, 100, 40, 55]
+let enemyBulletDamage = [20, 15, 35, 20, 20, 10, 40, 10]
+let enemyPowChance = [{health:0.1, speed:0.1, gun:0}, {health:0.1, speed:0.15, gun:0.05}, {health:0.1, speed:0.05, gun:0.1}, {health:0.1, speed:0.1, gun:0.1}, {health:0.1, speed:0.1, gun:0}, {health:0.1, speed:0.1, gun:0}, {health:0.1, speed:0.1, gun:0}, {health:0.1, speed:0.1, gun:0}]
 
 //visual variables
 let rumble = 0
@@ -59,7 +60,11 @@ let player = {x:300, y:300, xVel:0, yVel:0, health:100, gunType:0, bulletTimer:0
 let enemies = []
 
 //counts the number of each type of enemy
-let eTypeCount = [0, 0]
+let eTypeCount = []
+
+//powers contain the given powerups on the battle field
+//format: {x:number, y:number, lifetime:number, type:string(health, speed, gun), tier(non-gun powerups only):number(1-5), gun(gun powerups only):number}
+let powers = []
 
 //bullets contains the positions, trajectories, affiliations, statuses, and types of all bullets
 //Format: {x:number, y:number, ang:number(angle), afil:friend/foe, stat:live/dead, type:number}
@@ -133,10 +138,30 @@ function trimBullets () {
     }
 }
 
+function trimPowerups () {
+    if (powers.length >= 1) {
+        powers = powers.filter(power => {
+            if (power.lifetime <= 150) {
+                return true
+            } else {
+                return false
+            }
+        })
+    }
+}
+
 //spawns enemies with according attributes
 function spawnEnemy (xPos, yPos, eType) {
     enemies.push({x: xPos, y: yPos, state: "thinking", bulletTimer: enemyReload[eType], health: enemyHealth[eType],stat: "alive", type: eType, rangeFloor: 0, rangeCeiling: 999})
     console.log(`Enemy spawned @ (${xPos}, ${yPos})`)
+}
+
+function spawnPowerup (xPos, yPos, pType, pTier, gun) {
+    if (pType === "gun") {
+        powers.push({x:xPos, y:yPos, lifetime:0, type:pType, gun:gun})
+    } else {
+        powers.push({x:xPos, y:yPos, lifetime:0, type:pType, tier:pTier})
+    }
 }
 
 //spawns bullets with according attributes
@@ -150,7 +175,7 @@ function spawnWave (wave, level) {
         if (wave === 1) {
             spawnGroup(1, 0)
         } else if (wave === 2) {
-            spawnGroup(1, 1)
+            spawnGroup(2, 0)
         } else if (wave === 3) {
             spawnGroup(1, 0)
             spawnGroup(1, 1)
@@ -167,6 +192,9 @@ function spawnWave (wave, level) {
             spawnGroup(2, 2)
         } else if (wave === 8) {
             spawnGroup(2, 6)
+        } else if (wave === 9) {
+            spawnGroup(2, 4)
+            spawnGroup(1, 7)
         }
     } else if (level === 1) {
 
@@ -235,6 +263,8 @@ function drawEnemies () {
                 fill(14, 41, 140)
             } else if (enemy.type === 6) {
                 fill(10, 228, 252)
+            } else if (enemy.type === 7) {
+                fill(89, 89, 89)
             }
             if (enemy.stat === "alive") {
                 ellipse(enemy.x, enemy.y, 25, 25)
@@ -245,6 +275,14 @@ function drawEnemies () {
             }
         })
     }
+}
+
+function drawPowerups () {
+    powers.forEach(power => {
+        noStroke()
+        fill(50, 107, 168)
+        ellipse(power.x, power.y, 25, 25)
+    })
 }
 
 //draws bullets
@@ -472,6 +510,16 @@ function enemiesThink () {
                 enemy.state = "move6C"
             }
         }
+        if (enemy.state === "thinking" && enemy.type === 7) {
+            let decide = Math.round(Math.random(1, 3))
+            if (decide === 1) {
+                enemy.state = "move7A"
+            } else if (decide === 2) {
+                enemy.state = "move7B"
+            } else {
+                enemy.state = "move7C"
+            }
+        }
     })
 }
 
@@ -488,7 +536,7 @@ function driftText () {
 function enemiesShoot () {
     enemies.forEach(enemy => {
         if (enemy.bulletTimer <= 0 && gameRunning && !isTransitioning) {
-            if (enemy.type !== 6) {
+            if (enemy.type !== 6 && enemy.type !== 7) {
                 spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y), "foe", enemy.type)
             }
             if (enemy.type === 3) {
@@ -499,6 +547,10 @@ function enemiesShoot () {
             enemy.state = "thinking"
             if (enemy.type === 6) {
                 enemy.state = "exploding"
+                enemy.bulletTimer = enemyReload[enemy.type]
+            }
+            if (enemy.type === 7) {
+                enemy.state = "shooting"
                 enemy.bulletTimer = enemyReload[enemy.type]
             }
         }
@@ -518,6 +570,14 @@ function enemiesShoot () {
                 spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) - 2 * Math.PI/3 + Math.PI/6, "foe", enemy.type)
                 spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) + Math.PI + Math.PI/6, "foe", enemy.type)
             } else if (enemy.bulletTimer < 50) {
+                enemy.state = "thinking"
+                enemy.bulletTimer = enemyReload[enemy.type]
+            }
+        }
+        if (enemy.type === 7 && enemy.state === "shooting" && gameRunning && !isTransitioning) {
+            if (enemy.bulletTimer % 5 === 0) {
+                spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) - Math.PI/6 + 2*Math.PI*Math.random()/6, "foe", enemy.type)
+            } else if (enemy.bulletTimer < 30) {
                 enemy.state = "thinking"
                 enemy.bulletTimer = enemyReload[enemy.type]
             }
@@ -606,6 +666,16 @@ function moveEnemies () {
                 enemy.rangeFloor = 450
                 enemy.rangeCeiling = 550
             }
+            if (enemy.state === "move7A") {
+                enemy.rangeFloor = 250
+                enemy.rangeCeiling = 350
+            } else if (enemy.state === "move7B") {
+                enemy.rangeFloor = 350
+                enemy.rangeCeiling = 450
+            } else if (enemy.state === "move7C") {
+                enemy.rangeFloor = 450
+                enemy.rangeCeiling = 550
+            }
             //moves enemy closer if player leaves ideal range
             if (calcDist(enemy.x, enemy.y, player.x, player.y) > enemy.rangeCeiling) {
                 if (enemy.x < player.x) {
@@ -645,6 +715,9 @@ function moveBullets () {
         if (bullet.affil === "foe" && bullet.type === 6) {
             bullet.x += bulletSpeed*Math.cos(bullet.ang)/2
             bullet.y += bulletSpeed*Math.sin(bullet.ang)/2
+        } else if (bullet.affil === "friend" && bullet.type === 4) {
+            bullet.x += bulletSpeed*Math.cos(bullet.ang)/1.25
+            bullet.y += bulletSpeed*Math.sin(bullet.ang)/1.25
         } else {
             bullet.x += bulletSpeed*Math.cos(bullet.ang)
             bullet.y += bulletSpeed*Math.sin(bullet.ang)
@@ -712,61 +785,59 @@ function passRumble () {
 }
 
 function checkNextWave () {
-    if (changeDelay <= 0) {
-        if (gameLevel === 0) {
-            if (level0Trans[waveNum-1] === undefined) {
-                if (enemies.length <= 0) {
-                    defeated[gameLevel] = true
-                    isTransitioning = true
-                    transTo = 0
-                }
-            } else if(level0Trans[waveNum-1].type === "all") {
-                if (enemies.length <= level0Trans[waveNum-1].num) {
-                    waveNum ++
-                    spawnWave(waveNum, gameLevel)
-                }
-            }  else {
-                if (eTypeCount[level0Trans[waveNum-1].type] <= level0Trans[waveNum-1].num) {
-                    waveNum ++
-                    spawnWave(waveNum, gameLevel)
-                }
+    if (gameLevel === 0) {
+        if (level0Trans[waveNum-1] === undefined) {
+            if (enemies.length <= 0) {
+                defeated[gameLevel] = true
+                isTransitioning = true
+                transTo = 0
             }
-        } else if (gameLevel === 1) {
-            if (level1Trans[waveNum-1] === undefined) {
-                if (enemies.length <= 0) {
-                    console.log("All enemies of level defeated.")
-                }
-            } else if(level1Trans[waveNum-1].type === "all") {
-                if (enemies.length <= level1Trans[waveNum-1].num) {
-                    waveNum ++
-                    spawnWave(waveNum, gameLevel)
-                }
-            }  else {
-                if (eTypeCount[level1Trans[waveNum-1].type] <= level1Trans[waveNum-1].num) {
-                    waveNum ++
-                    spawnWave(waveNum, gameLevel)
-                }
+        } else if(level0Trans[waveNum-1].type === "all") {
+            if (enemies.length <= level0Trans[waveNum-1].num) {
+                waveNum ++
+                spawnWave(waveNum, gameLevel)
             }
-        } else if (gameLevel === 2) {
-            if (level2Trans[waveNum-1] === undefined) {
-                if (enemies.length <= 0) {
-                    console.log("All enemies of level defeated.")
-                }
-            } else if(level2Trans[waveNum-1].type === "all") {
-                if (enemies.length <= level2Trans[waveNum-1].num) {
-                    waveNum ++
-                    spawnWave(waveNum, gameLevel)
-                }
-            }  else {
-                if (eTypeCount[level2Trans[waveNum-1].type] <= level2Trans[waveNum-1].num) {
-                    waveNum ++
-                    spawnWave(waveNum, gameLevel)
-                }
+        }  else {
+            if (eTypeCount[level0Trans[waveNum-1].type] <= level0Trans[waveNum-1].num) {
+                waveNum ++
+                spawnWave(waveNum, gameLevel)
             }
-        } else if (gameLevel === 3) {
-        } else if (gameLevel === 4) {
-        } else if (gameLevel === 5) {
         }
+    } else if (gameLevel === 1) {
+        if (level1Trans[waveNum-1] === undefined) {
+            if (enemies.length <= 0) {
+                console.log("All enemies of level defeated.")
+            }
+        } else if(level1Trans[waveNum-1].type === "all") {
+            if (enemies.length <= level1Trans[waveNum-1].num) {
+                waveNum ++
+                spawnWave(waveNum, gameLevel)
+            }
+        }  else {
+            if (eTypeCount[level1Trans[waveNum-1].type] <= level1Trans[waveNum-1].num) {
+                waveNum ++
+                spawnWave(waveNum, gameLevel)
+            }
+        }
+    } else if (gameLevel === 2) {
+        if (level2Trans[waveNum-1] === undefined) {
+            if (enemies.length <= 0) {
+                console.log("All enemies of level defeated.")
+            }
+        } else if(level2Trans[waveNum-1].type === "all") {
+            if (enemies.length <= level2Trans[waveNum-1].num) {
+                waveNum ++
+                spawnWave(waveNum, gameLevel)
+            }
+        }  else {
+            if (eTypeCount[level2Trans[waveNum-1].type] <= level2Trans[waveNum-1].num) {
+                waveNum ++
+                spawnWave(waveNum, gameLevel)
+            }
+        }
+    } else if (gameLevel === 3) {
+    } else if (gameLevel === 4) {
+    } else if (gameLevel === 5) {
     }
     updateETypeCount()
 }
@@ -832,6 +903,7 @@ function draw () {
         passRumble()
     }
 
+    drawPowerups()
     drawBullets()
     drawEnemies()
     drawPlayer()
@@ -875,8 +947,7 @@ function draw () {
 
     trimBullets()
     trimEnemies()
-
-    changeDelay --
+    trimPowerups()
 }
 
 function keyTyped () {
@@ -885,7 +956,8 @@ function keyTyped () {
             gameRunning = true
             gameState = 1
         } else if (gameState === 2) {
-            restart()
+            transTo = 0
+            isTransitioning = true
         } else {
             gameRunning = false
         }
@@ -896,6 +968,13 @@ function keyTyped () {
 function playerShoot () {
     if (player.bulletTimer < 1 && gameRunning && mouseIsPressed && !isTransitioning) {
         spawnBullet(player.x, player.y, calcAngle(player.x, player.y, mouseX, mouseY), "friend", player.gunType)
+        if (player.gunType === 3) {
+            spawnBullet(player.x, player.y, calcAngle(player.x, player.y, mouseX, mouseY) + Math.PI/10, "friend", player.gunType)
+            spawnBullet(player.x, player.y, calcAngle(player.x, player.y, mouseX, mouseY) - Math.PI/10, "friend", player.gunType)
+        }
+        if (player.gunType === 4) {
+            rumble += 3
+        }
         player.bulletTimer = playerReload[player.gunType]
     }
 }
