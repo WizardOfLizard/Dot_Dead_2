@@ -46,6 +46,8 @@ let bright = 0
 let brightChange = 2
 let transTo = undefined
 
+let healGlow = 0
+
 //Counts how many waves have been sent on player, used for difficulty and score
 let waveNum = 1
 
@@ -53,7 +55,7 @@ let highScore = 0
 
 //stores all data on the player
 //postion(x, y), velocity(x, y), health, gun type, reload timer, and invulnerability frames
-let player = {x:300, y:300, xVel:0, yVel:0, health:100, gunType:0, bulletTimer:0, iFrames: 0, regenTime: 100}
+let player = {x:300, y:300, xVel:0, yVel:0, health:100, gunType:0, bulletTimer:0, iFrames: 0, regenTime: 100, speedBoost: 0, speedTimer: 0}
 
 //enemies contains the positions, states, bullet timers, health, statuses, and types of all enemies
 //Format: {x:number, y:number, state:unique by enemy, bulletTimer:number, health:number, stat:alive/dead, type:number, threat: number}
@@ -115,10 +117,11 @@ function checkBulletBounds () {
 //clear enemies that are dead
 function trimEnemies () {
     if (enemies.length >= 1) {
-        enemies = enemies.filter(enemy => {
+        enemies = enemies.filter((enemy, num) => {
             if (enemy.stat === "alive") {
                 return true
             } else {
+                chancePowerup(num)
                 return false
             }
         })
@@ -141,7 +144,8 @@ function trimBullets () {
 function trimPowerups () {
     if (powers.length >= 1) {
         powers = powers.filter(power => {
-            if (power.lifetime <= 150) {
+            power.lifetime ++
+            if (power.lifetime <= 250) {
                 return true
             } else {
                 return false
@@ -280,8 +284,17 @@ function drawEnemies () {
 function drawPowerups () {
     powers.forEach(power => {
         noStroke()
-        fill(50, 107, 168)
-        ellipse(power.x, power.y, 25, 25)
+        fill(50, 107, 168, 255 - power.lifetime)
+        if (power.type === "health") {
+            fill(50, 168, 82, 255 - power.lifetime)
+        }
+        if (power.type === "speed") {
+            fill(30, 211, 247, 255 - power.lifetime)
+        }
+        if (power.type === "gun") {
+            fill(184, 2, 2, 255 - power.lifetime)
+        }
+        ellipse(power.x, power.y, 15, 15)
     })
 }
 
@@ -324,6 +337,14 @@ function drawUI () {
     text(`Wave: ${waveNum}`, 580, 20)
     if (player.iFrames > 0) {
         fill(255, 0, 0, 2*player.iFrames)
+        rect(0, 0, 600, 600)
+    }
+    if (player.speedTimer > 0) {
+        fill(30, 211, 247, .5*player.speedTimer)
+        rect(0, 0, 600, 600)
+    }
+    if (healGlow > 0) {
+        fill(35, 194, 45, healGlow)
         rect(0, 0, 600, 600)
     }
     if (gameState === 0) {
@@ -418,27 +439,27 @@ function transitionScene () {
 
 function accPlayer () {
     //governs UP and W keys
-    if (player.yVel > -playerSpeed && keyIsDown(87)) {
+    if (player.yVel > -playerSpeed - player.speedBoost && keyIsDown(87)) {
         player.yVel -= playerSpeed/5
-    } else if (player.yVel > -playerSpeed && keyIsDown(38)) {
+    } else if (player.yVel > -playerSpeed - player.speedBoost && keyIsDown(38)) {
         player.yVel -= playerSpeed/5
     }
     //governs LEFT and A keys
-    if (player.xVel > -playerSpeed && keyIsDown(65)) {
+    if (player.xVel > -playerSpeed - player.speedBoost && keyIsDown(65)) {
         player.xVel -= playerSpeed/5
-    } else if (player.xVel > -playerSpeed && keyIsDown(37)) {
+    } else if (player.xVel > -playerSpeed - player.speedBoost && keyIsDown(37)) {
         player.xVel -= playerSpeed/5
     }
     //governs DOWN and S keys
-    if (player.yVel < playerSpeed && keyIsDown(83)) {
+    if (player.yVel < playerSpeed + player.speedBoost && keyIsDown(83)) {
         player.yVel += playerSpeed/5
-    } else if (player.yVel < playerSpeed && keyIsDown(40)) {
+    } else if (player.yVel < playerSpeed + player.speedBoost && keyIsDown(40)) {
         player.yVel += playerSpeed/5
     }
     //governs RIGHT and D keys
-    if (player.xVel < playerSpeed && keyIsDown(68)) {
+    if (player.xVel < playerSpeed + player.speedBoost && keyIsDown(68)) {
         player.xVel += playerSpeed/5
-    } else if (player.xVel < playerSpeed && keyIsDown(39)) {
+    } else if (player.xVel < playerSpeed + player.speedBoost && keyIsDown(39)) {
         player.xVel += playerSpeed/5
     }
     //decelerates player vertically when no keys are pressed
@@ -521,6 +542,23 @@ function enemiesThink () {
             }
         }
     })
+}
+
+function chancePowerup (eNum) {
+    let chance = Math.random()
+    console.log(chance)
+    let tier = Math.round(Math.random()*5)
+    let gun = Math.round(Math.random()*playerReload.length)
+    if (chance <= enemyPowChance[enemies[eNum].type].health) {
+        spawnPowerup(enemies[eNum].x, enemies[eNum].y, "health", tier, undefined)
+        console.log("Healthpack spawned")
+    } else if (chance <= enemyPowChance[enemies[eNum].type].health + enemyPowChance[enemies[eNum].type].speed) {
+        spawnPowerup(enemies[eNum].x, enemies[eNum].y, "speed", tier, undefined)
+        console.log("Speedboost spawned")
+    } else if (chance <= enemyPowChance[enemies[eNum].type].health + enemyPowChance[enemies[eNum].type].speed + enemyPowChance[enemies[eNum].type].gun) {
+        spawnPowerup(enemies[eNum].x, enemies[eNum].y, "gun", undefined, gun)
+        console.log("Gun spawned")
+    }
 }
 
 function driftText () {
@@ -725,6 +763,15 @@ function moveBullets () {
     })
 }
 
+function driftPowUps () {
+    powers.forEach(power => {
+        if (calcDist(power.x, power.y, player.x, player.y) <= 100) {
+            power.x += Math.cos(calcAngle(power.x, power.y, player.x, player.y)) * 1
+            power.y += Math.sin(calcAngle(power.x, power.y, player.x, player.y)) * 1
+        }
+    })
+}
+
 function playerRegen () {
     if (player.health > 0 && gameRunning && player.health < 100) {
         player.regenTime --
@@ -761,6 +808,28 @@ function collideBullets () {
     })
 }
 
+function collidePowerups () {
+    powers.forEach(power => {
+        if(calcDist(power.x, power.y, player.x, player.y) <= 20) {
+            if (power.type === "health") {
+                healGlow = 100
+                if (player.health >= 100 - power.tier * 10) {
+                    player.health = 100
+                } else {
+                    player.health += power.tier * 10
+                }
+            }
+            if (power.type === "speed") {
+                if (player.speedBoost < power.tier) {
+                    player.speedBoost = power.tier
+                }
+                player.speedTimer = 150
+            }
+            power.lifetime = 9999999
+        }
+    })
+}
+
 function passBulletTimer () {
     player.bulletTimer --
     if (!isTransitioning) {
@@ -781,6 +850,19 @@ function passRumble () {
     }
     if (rumble > 3) {
         rumble = 3
+    }
+}
+
+function passPowEffects () {
+    if (player.speedTimer > 0) {
+        player.speedTimer --
+    }
+    if (healGlow > 0) {
+        healGlow --
+    }
+    if (player.speedTimer <= 0) {
+        player.speedTimer = 0
+        player.speedBoost = 0
     }
 }
 
@@ -873,14 +955,7 @@ function updateETypeCount () {
 }
 
 function restart () {
-    player.x = 300
-    player.y = 300
-    player.xVel = 0
-    player.yVel = 0
-    player.health = 100
-    player.bulletTimer = 0
-    player.iFrames = 0
-    player.regenTime = 100
+    player = {x:300, y:300, xVel:0, yVel:0, health:100, gunType:0, bulletTimer:0, iFrames: 0, regenTime: 100, speedBoost: 0, speedTimer: 0}
     waveNum = 1
     enemies = []
     bullets = []
@@ -922,16 +997,19 @@ function draw () {
         moveEnemies()
         moveBullets()
 
+        driftPowUps()
+
         playerShoot()
         enemiesShoot()
 
         playerRegen()
 
         collideBullets()
-
+        collidePowerups()
 
         passBulletTimer()
         passPlayerIFrames()
+        passPowEffects()
 
         checkNextWave()
     }
