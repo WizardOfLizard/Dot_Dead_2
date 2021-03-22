@@ -33,7 +33,7 @@ let enemySpeed = [3, 6, 2, 3, 3, 2, 3, 1]
 let enemyReload = [55, 35, 80, 60, 55, 65, 100, 80]
 let enemyHealth = [30, 20, 40, 60, 80, 100, 40, 55]
 let enemyBulletDamage = [20, 15, 35, 20, 20, 10, 40, 10]
-let enemyPowChance = [{health:0.1, speed:0.1, gun:0}, {health:0.1, speed:0.15, gun:0.05}, {health:0.1, speed:0.05, gun:0.1}, {health:0.1, speed:0.1, gun:0.1}, {health:0.1, speed:0.1, gun:0}, {health:0.1, speed:0.1, gun:0}, {health:0.1, speed:0.1, gun:0}, {health:0.1, speed:0.1, gun:0}]
+let enemyPowChance = [{health:0.1, speed:0.1, gun:0.05}, {health:0.1, speed:0.2, gun:0.1}, {health:0.15, speed:0.15, gun:0.1}, {health:0.2, speed:0.1, gun:0.1}, {health:0.2, speed:0.2, gun:0.15}, {health:0.3, speed:0.05, gun:0.1}, {health:0.15, speed:0.05, gun:0.2}, {health:0.15, speed:0.1, gun:0.2}]
 
 //visual variables
 let rumble = 0
@@ -65,7 +65,7 @@ let enemies = []
 let eTypeCount = []
 
 //powers contain the given powerups on the battle field
-//format: {x:number, y:number, lifetime:number, type:string(health, speed, gun), tier(non-gun powerups only):number(1-5), gun(gun powerups only):number}
+//format: {x:number, y:number, lifetime:number, type:string(health, speed, gun), gun(gun powerups only):number}
 let powers = []
 
 //bullets contains the positions, trajectories, affiliations, statuses, and types of all bullets
@@ -157,14 +157,13 @@ function trimPowerups () {
 //spawns enemies with according attributes
 function spawnEnemy (xPos, yPos, eType) {
     enemies.push({x: xPos, y: yPos, state: "thinking", bulletTimer: enemyReload[eType], health: enemyHealth[eType],stat: "alive", type: eType, rangeFloor: 0, rangeCeiling: 999})
-    console.log(`Enemy spawned @ (${xPos}, ${yPos})`)
 }
 
-function spawnPowerup (xPos, yPos, pType, pTier, gun) {
+function spawnPowerup (xPos, yPos, pType, gun) {
     if (pType === "gun") {
         powers.push({x:xPos, y:yPos, lifetime:0, type:pType, gun:gun})
     } else {
-        powers.push({x:xPos, y:yPos, lifetime:0, type:pType, tier:pTier})
+        powers.push({x:xPos, y:yPos, lifetime:0, type:pType})
     }
 }
 
@@ -323,18 +322,11 @@ function drawUI () {
     rect(0, 595, 600, 5)
     rect(595, 0, 5, 600)
     fill(7, 172, 232)
-    textAlign(LEFT, TOP)
-    textSize(20)
-    text(`Health: ${player.health}`, 20, 20)
     if (player.health > 0) {
         rect(300 - (player.health + ((100 - player.regenTime) / 100)) * 2, 25, (player.health + ((100 - player.regenTime) / 100))*4, 15)
         ellipse(300.5 - (player.health + ((100 - player.regenTime) / 100)) * 2, 32.5, 10, 15)
         ellipse(299.5 + (player.health + ((100 - player.regenTime) / 100)) * 2, 32.5, 10, 15)
     }
-    fill(224, 54, 54)
-    textAlign(RIGHT, TOP)
-    textSize(20)
-    text(`Wave: ${waveNum}`, 580, 20)
     if (player.iFrames > 0) {
         fill(255, 0, 0, 2*player.iFrames)
         rect(0, 0, 600, 600)
@@ -546,18 +538,13 @@ function enemiesThink () {
 
 function chancePowerup (eNum) {
     let chance = Math.random()
-    console.log(chance)
-    let tier = Math.round(Math.random()*5)
-    let gun = Math.round(Math.random()*playerReload.length)
+    let gun = Math.round(Math.random()*(playerReload.length-1))
     if (chance <= enemyPowChance[enemies[eNum].type].health) {
-        spawnPowerup(enemies[eNum].x, enemies[eNum].y, "health", tier, undefined)
-        console.log("Healthpack spawned")
+        spawnPowerup(enemies[eNum].x, enemies[eNum].y, "health", undefined)
     } else if (chance <= enemyPowChance[enemies[eNum].type].health + enemyPowChance[enemies[eNum].type].speed) {
-        spawnPowerup(enemies[eNum].x, enemies[eNum].y, "speed", tier, undefined)
-        console.log("Speedboost spawned")
+        spawnPowerup(enemies[eNum].x, enemies[eNum].y, "speed", undefined)
     } else if (chance <= enemyPowChance[enemies[eNum].type].health + enemyPowChance[enemies[eNum].type].speed + enemyPowChance[enemies[eNum].type].gun) {
-        spawnPowerup(enemies[eNum].x, enemies[eNum].y, "gun", undefined, gun)
-        console.log("Gun spawned")
+        spawnPowerup(enemies[eNum].x, enemies[eNum].y, "gun", gun)
     }
 }
 
@@ -813,17 +800,18 @@ function collidePowerups () {
         if(calcDist(power.x, power.y, player.x, player.y) <= 20) {
             if (power.type === "health") {
                 healGlow = 100
-                if (player.health >= 100 - power.tier * 10) {
+                if (player.health >= 70) {
                     player.health = 100
                 } else {
-                    player.health += power.tier * 10
+                    player.health += 30
                 }
             }
             if (power.type === "speed") {
-                if (player.speedBoost < power.tier) {
-                    player.speedBoost = power.tier
-                }
+                player.speedBoost = 3
                 player.speedTimer = 150
+            }
+            if (power.type === "gun") {
+                player.gunType = power.gun
             }
             power.lifetime = 9999999
         }
@@ -966,7 +954,6 @@ function restart () {
 //Makes canvas and is useful for debugging
 function setup () {
     createCanvas(600, 600)
-    
 }
 
 //Runs repeatedly, most important stuff happens here
