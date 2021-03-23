@@ -359,12 +359,34 @@ function drawUI () {
                 fill(150, 150, 150, 100)
                 rect(0, 0, 600, 600)
                 fill(0, 0, 0)
+                rect(100, 250, 400, 5)
                 textAlign(CENTER, CENTER)
+                textSize(50)
+                text("You Died", 300, 200)
                 textSize(40)
-                text("You died", 300, 225)
-                text(`Your score was: ${waveNum}`, 300, 275)
-                text(`Your high-score is: ${highScore}`, 300, 325)
-                text("Press space to play again", 300, 375)
+                if (mouseX >= 150 && mouseX <= 450 && mouseY >= 250 && mouseY <= 325) {
+                    fill(255, 255, 255, 10)
+                    for(let i = 0 + calcDist(mouseX, mouseY, 300, 300);i < 100;i += 2) {
+                        ellipse(300, 300, 2.5*i, 0.75*i)
+                    }
+                }
+                if (mouseX >= 50 && mouseX <= 550 && mouseY >= 325 && mouseY <= 400) {
+                    fill(255, 255, 255, 10)
+                    for(let i = 0 + calcDist(mouseX, mouseY, 300, 300);i < 100;i += 2) {
+                        ellipse(300, 350, 3*i, 0.75*i)
+                    }
+                }
+                fill(0, 0, 0)
+                text("Play Again", 300, 300)
+                text("Return to Menu", 300, 350)
+                if (mouseX >= 150 && mouseX <= 450 && mouseY >= 280 && mouseY <= 320 && mouseIsPressed) {
+                    transTo = 1
+                    isTransitioning = true
+                }
+                if (mouseX >= 150 && mouseX <= 450 && mouseY >= 330 && mouseY <= 370 && mouseIsPressed) {
+                    transTo = 0
+                    isTransitioning = true
+                }
             }
         }
     }
@@ -411,6 +433,7 @@ function transitionScene () {
         if (bright >= 100) {
             brightChange = -2
             if (transTo === 1) {
+                restart()
                 gameState = 1
                 gameRunning = true
                 changeDelay = 25
@@ -1026,6 +1049,11 @@ function keyTyped () {
         } else {
             gameRunning = false
         }
+    }
+    if (keyCode === 75) {
+        player.health = 0
+        player.iFrames = 50
+        console.log("Player killed.")
     }
 }
 
