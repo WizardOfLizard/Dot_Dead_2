@@ -4,7 +4,27 @@
 let gameRunning = false
 let gameState = 0
 
+let menuRoom = 0
+
+let tutorialStage = 0
+let tutorialTimer = 0
+
+//settings
+//integer
+let volume = 5
+//string:None/Low/Regular[default]
+let rumbleFX = "Regular"
+//string:Moody/Dark/Regular[default]
+let brightness = "Regular"
+//string:Disabled/Enabled[default]
+let flashing = "Enabled"
+
+//0-main, 1-level select, 2-directions, 3-options
 let gameLevel = 0
+
+//string
+//options: campaign/level
+let playType = undefined
 
 let changeDelay = 0
 
@@ -45,6 +65,8 @@ let isTransitioning = false
 let bright = 0
 let brightChange = 2
 let transTo = undefined
+let menuTo = undefined
+let slowTrans = false
 
 let healGlow = 0
 
@@ -345,16 +367,43 @@ function drawUI () {
         fill(0, 0, 0)
         textAlign(CENTER, CENTER)
         textSize(40)
-        text("Press Space to Start", 300, 200)
+        text("Press Space to Start", 300, 150)
     } else {
         if (gameRunning === false) {
             if (gameState === 1) {
                 fill(150, 150, 150, 100)
                 rect(0, 0, 600, 600)
+                fill(150, 150, 150, 100)
+                rect(0, 0, 600, 600)
+                fill(0, 0, 0)
+                rect(100, 200, 400, 5)
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
                 textSize(40)
-                text("Press Space to Resume", 300, 300)
+                text("Game Paused", 300, 150)
+                if (mouseX >= 150 && mouseX <= 450 && mouseY >= 200 && mouseY <= 275) {
+                    fill(255, 255, 255, 10)
+                    for(let i = 0 + calcDist(mouseX, mouseY, mouseX, 250);i < 100;i += 2) {
+                        ellipse(300, 250, 1.5*i, 0.75*i)
+                    }
+                }
+                if (mouseX >= 150 && mouseX <= 450 && mouseY >= 275 && mouseY <= 325) {
+                    fill(255, 255, 255, 10)
+                    for(let i = 0 + calcDist(mouseX, mouseY, mouseX, 300);i < 100;i += 2) {
+                        ellipse(300, 300, 2*i, 0.75*i)
+                    }
+                }
+                if (mouseX >= 150 && mouseX <= 450 && mouseY >= 325 && mouseY <= 400) {
+                    fill(255, 255, 255, 10)
+                    for(let i = 0 + calcDist(mouseX, mouseY, mouseX, 350);i < 100;i += 2) {
+                        ellipse(300, 350, 2*i, 0.75*i)
+                    }
+                }
+                fill(0, 0, 0)
+                textSize(30)
+                text("Resume", 300, 250)
+                text("Restart Level", 300, 300)
+                text("Quit to Menu", 300, 350)
             } else {
                 fill(150, 150, 150, 100)
                 rect(0, 0, 600, 600)
@@ -366,27 +415,19 @@ function drawUI () {
                 textSize(40)
                 if (mouseX >= 150 && mouseX <= 450 && mouseY >= 250 && mouseY <= 325) {
                     fill(255, 255, 255, 10)
-                    for(let i = 0 + calcDist(mouseX, mouseY, 300, 300);i < 100;i += 2) {
+                    for(let i = 0 + calcDist(mouseX, mouseY, mouseX, 300);i < 100;i += 2) {
                         ellipse(300, 300, 2.5*i, 0.75*i)
                     }
                 }
                 if (mouseX >= 50 && mouseX <= 550 && mouseY >= 325 && mouseY <= 400) {
                     fill(255, 255, 255, 10)
-                    for(let i = 0 + calcDist(mouseX, mouseY, 300, 300);i < 100;i += 2) {
+                    for(let i = 0 + calcDist(mouseX, mouseY, mouseX, 300);i < 100;i += 2) {
                         ellipse(300, 350, 3*i, 0.75*i)
                     }
                 }
                 fill(0, 0, 0)
                 text("Play Again", 300, 300)
                 text("Return to Menu", 300, 350)
-                if (mouseX >= 150 && mouseX <= 450 && mouseY >= 280 && mouseY <= 320 && mouseIsPressed) {
-                    transTo = 1
-                    isTransitioning = true
-                }
-                if (mouseX >= 150 && mouseX <= 450 && mouseY >= 330 && mouseY <= 370 && mouseIsPressed) {
-                    transTo = 0
-                    isTransitioning = true
-                }
             }
         }
     }
@@ -394,31 +435,237 @@ function drawUI () {
 
 function drawMenu () {
     if (gameState === 0) {
-        background(27, 81, 207)
-        textAlign(CENTER, CENTER)
-        textSize(50)
-        fill(0, 0, 0)
-        text("Dot Dead 2", 300, 100 + textShift)
-        textSize(15)
-        text("Daniel L. Hensler", 300, 140 + textShift)
-        strokeWeight(5)
-        stroke(0, 0, 0)
-        fill(67, 219, 11)
-        if (calcDist(mouseX, mouseY, 300, 300) <= 37) {
-            stroke(255, 255, 255)
-            fill(186, 15, 15)
-        }
-        ellipse(300, 300, 75, 75)
-        strokeWeight(3)
-        fill(251, 255, 0)
-        if (calcDist(mouseX, mouseY, 300, 300) <= 37) {
-            stroke(255, 255, 255)
+        if (menuRoom === 0) {
+            background(140, 140, 140)
+            noStroke()
             fill(0, 0, 0)
-        }
-        triangle(285, 285, 285, 315, 325, 300)
-        if (calcDist(mouseX, mouseY, 300, 300) <= 37 && mouseIsPressed && !isTransitioning) {
-            isTransitioning = true
-            transTo = 1
+            rect(0, 0, 600, 5)
+            rect(0, 0, 5, 600)
+            rect(0, 595, 600, 5)
+            rect(595, 0, 5, 600)
+            textAlign(CENTER, CENTER)
+            textSize(50)
+            fill(0, 0, 0)
+            text("Dot Dead 2", 300, 100 + textShift)
+            textSize(15)
+            text("Daniel L. Hensler", 300, 140 + textShift)
+            if (mouseX >= 150 && mouseX <= 450 && mouseY >= 175 && mouseY <= 275 && !isTransitioning) {
+                fill(255, 255, 255, 5)
+                for(let i = 0 + calcDist(mouseX, mouseY, mouseX, 225);i < 100;i += 2) {
+                    ellipse(300, 225, 3.5*i, 0.75*i)
+                }
+            }
+            if (mouseX >= 175 && mouseX <= 425 && mouseY >= 250 && mouseY <= 350 && !isTransitioning) {
+                fill(255, 255, 255, 5)
+                for(let i = 0 + calcDist(mouseX, mouseY, mouseX, 300);i < 100;i += 2) {
+                    ellipse(300, 300, 2.5*i, 0.75*i)
+                }
+            }
+            if (mouseX >= 200 && mouseX <= 400 && mouseY >= 325 && mouseY <= 425 && !isTransitioning) {
+                fill(255, 255, 255, 5)
+                for(let i = 0 + calcDist(mouseX, mouseY, mouseX, 375);i < 100;i += 2) {
+                    ellipse(300, 375, 2*i, 0.75*i)
+                }
+            }
+            if (mouseX >= 225 && mouseX <= 375 && mouseY >= 400 && mouseY <= 500 && !isTransitioning) {
+                fill(255, 255, 255, 5)
+                for(let i = 0 + calcDist(mouseX, mouseY, mouseX, 450);i < 100;i += 2) {
+                    ellipse(300, 450, 1.8*i, 0.75*i)
+                }
+            }
+            fill(0, 0, 0)
+            textAlign(CENTER, CENTER)
+            textSize(40)
+            text("Campaign Mode", 300, 225)
+            text("Level Select", 300, 300)
+            text("Directions", 300, 375)
+            text("Settings", 300, 450)
+        } else if (menuRoom === 1) {
+            background(140, 140, 140)
+            noStroke()
+            fill(0, 0, 0)
+            rect(0, 0, 600, 5)
+            rect(0, 0, 5, 600)
+            rect(0, 595, 600, 5)
+            rect(595, 0, 5, 600)
+            textAlign(CENTER, CENTER)
+            textSize(50)
+            fill(0, 0, 0)
+            text("Level Select", 300, 100 + textShift)
+            if (mouseX >= 200 && mouseX <= 400 && mouseY >= 150 && mouseY <= 200 && !isTransitioning) {
+                fill(255, 255, 255, 5)
+                for(let i = 0 + calcDist(mouseX, mouseY, mouseX, 175);i < 100;i += 2) {
+                    ellipse(300, 175, 2*i, 0.5*i)
+                }
+            }
+            fill(0, 0, 0)
+            textSize(20)
+            text("Back to Main Menu", 300, 175)
+            strokeWeight(5)
+            stroke(0, 0, 0)
+            fill(67, 219, 11)
+            if (calcDist(mouseX, mouseY, 300, 300) <= 37 && !isTransitioning) {
+                stroke(255, 255, 255)
+                fill(186, 15, 15)
+            }
+            ellipse(300, 300, 75, 75)
+            strokeWeight(3)
+            fill(251, 255, 0)
+            stroke(0, 0, 0)
+            if (calcDist(mouseX, mouseY, 300, 300) <= 37 && !isTransitioning) {
+                stroke(255, 255, 255)
+                fill(0, 0, 0)
+            }
+            triangle(285, 285, 285, 315, 325, 300)
+            fill(67, 219, 11)
+            stroke(0, 0, 0)
+            if (mouseX >= 200 && mouseX <= 225 && mouseY >= 285 && mouseY <= 315 && !isTransitioning) {
+                stroke(255, 255, 255)
+                fill(0, 0, 0)
+            }
+            triangle(225, 285, 225, 315, 200, 300)
+            fill(67, 219, 11)
+            stroke(0, 0, 0)
+            if (mouseX >= 375 && mouseX <= 400 && mouseY >= 285 && mouseY <= 315 && !isTransitioning) {
+                stroke(255, 255, 255)
+                fill(0, 0, 0)
+            }
+            triangle(375, 285, 375, 315, 400, 300)
+            fill(0, 0, 0)
+            noStroke()
+            textSize(40)
+            text(`Level ${gameLevel}`, 300, 400 - textShift/2)
+        } else if (menuRoom === 2) {
+            background(200, 200, 200)
+            noStroke()
+            fill(0, 0, 0)
+            rect(0, 0, 600, 5)
+            rect(0, 0, 5, 600)
+            rect(0, 595, 600, 5)
+            rect(595, 0, 5, 600)
+            textAlign(CENTER, CENTER)
+            textSize(50)
+            fill(0, 0, 0)
+            text("How to play", 300, 100+textShift)
+            textSize(25)
+            fill(173, 129, 5)
+            let tutorialMessage = "Hello."
+            if (tutorialStage === 0) {
+                if (tutorialTimer >= 1000) {
+                    tutorialMessage = "Umm, please move along now, it's not difficult..."
+                } else if (tutorialTimer >= 500) {
+                    tutorialMessage = "Now, please attempt to move using either the WASD keys or the Arrow keys."
+                } else if (tutorialTimer >= 250) {
+                    tutorialMessage = "It is good that you have come to learn..."
+                }
+            } else if (tutorialStage === 1) {
+                if (tutorialTimer >= 500) {
+                    tutorialMessage = "Now please attempt to shoot by clicking, you aim where your mouse is."
+                } else if (tutorialTimer >= 250) {
+                    tutorialMessage = "Now moving is useful, but it is nowhere near enough to survive."
+                } else if (tutorialTimer >= 0) {
+                    tutorialMessage = "Very good..."
+                } else if (tutorialTimer >= -250) {
+                    tutorialMessage = "Ah, very eager I see..."
+                }
+            } else if (tutorialStage === 2) {
+                if (tutorialTimer >= 750) {
+                    tutorialMessage = "I will be watching with great interest..."
+                    transTo = 0
+                    menuTo = 0
+                    brightChange = 1
+                    slowTrans = true
+                    isTransitioning = true
+                } else if (tutorialTimer >= 500) {
+                    tutorialMessage = "Go out, prove your worth, defeat your enemies."
+                } else if (tutorialTimer >= 250) {
+                    tutorialMessage = "Now I suppose you are ready..."
+                } else if (tutorialTimer >= 0) {
+                    tutorialMessage = "Excellent..."
+                } else if (tutorialTimer >= -250) {
+                    tutorialMessage = "I see you're excited..."
+                } else if (tutorialTimer >= -500) {
+                    tutorialMessage = "My, that was quick..."
+                }
+            } else {
+                tutorialMessage = "I have no clue how you got here.  Don't be afraid, I'll send you back."
+                if (tutorialTimer >= 250) {
+                    transTo = 0
+                    menuTo = 0
+                    isTransitioning = true
+                }
+            }
+            text(tutorialMessage, 50, 175 - textShift/2, 500)
+            drawBullets()
+            drawEnemies()
+            drawPlayer()
+            passTutorial()
+        } else if (menuRoom === 3) {
+            background(140, 140, 140)
+            noStroke()
+            fill(0, 0, 0)
+            rect(0, 0, 600, 5)
+            rect(0, 0, 5, 600)
+            rect(0, 595, 600, 5)
+            rect(595, 0, 5, 600)
+            textAlign(CENTER, CENTER)
+            textSize(50)
+            fill(0, 0, 0)
+            text("Settings", 300, 100)
+            rect(100, 150, 400, 5)
+            textSize(25)
+            textAlign(LEFT, CENTER)
+            text("Volume", 125, 175)
+            text("Rumble FX", 125, 200)
+            text("Brightness", 125, 225)
+            text("Flashing", 125, 250)
+            if (mouseX >= 400 && mouseX <= 450 && mouseY >= 155 && mouseY <= 195 && !isTransitioning) {
+                fill(255, 255, 255, 5)
+                for(let i = 0 + calcDist(mouseX, mouseY, mouseX, 175);i < 100;i += 2) {
+                    ellipse(425, 175, 0.25*i, 0.35*i)
+                }
+            }
+            if (mouseX >= 400 && mouseX <= 450 && mouseY >= 180 && mouseY <= 220 && !isTransitioning) {
+                fill(255, 255, 255, 5)
+                for(let i = 0 + calcDist(mouseX, mouseY, mouseX, 200);i < 100;i += 2) {
+                    ellipse(425, 200, 1.2*i, 0.35*i)
+                }
+            }
+            if (mouseX >= 400 && mouseX <= 450 && mouseY >= 205 && mouseY <= 245 && !isTransitioning) {
+                fill(255, 255, 255, 5)
+                for(let i = 0 + calcDist(mouseX, mouseY, mouseX, 225);i < 100;i += 2) {
+                    ellipse(425, 225, 1.2*i, 0.35*i)
+                }
+            }
+            if (mouseX >= 400 && mouseX <= 450 && mouseY >= 230 && mouseY <= 270 && !isTransitioning) {
+                fill(255, 255, 255, 5)
+                for(let i = 0 + calcDist(mouseX, mouseY, mouseX, 250);i < 100;i += 2) {
+                    ellipse(425, 250, 1.2*i, 0.35*i)
+                }
+            }
+            fill(0, 0, 0)
+            textAlign(CENTER, CENTER)
+            text(volume, 425, 175)
+            text(rumbleFX, 425, 200)
+            text(brightness, 425, 225)
+            text(flashing, 425, 250)
+            if (mouseX >= 250 && mouseX <= 350 && mouseY >= 275 && mouseY <= 325 && !isTransitioning) {
+                fill(255, 255, 255, 5)
+                for(let i = 0 + calcDist(mouseX, mouseY, mouseX, 300);i < 100;i += 2) {
+                    ellipse(300, 300, 3*i, 0.55*i)
+                }
+            }
+            if (mouseX >= 250 && mouseX <= 350 && mouseY >= 325 && mouseY <= 375 && !isTransitioning) {
+                fill(255, 255, 255, 5)
+                for(let i = 0 + calcDist(mouseX, mouseY, mouseX, 350);i < 100;i += 2) {
+                    ellipse(300, 350, 1*i, 0.55*i)
+                }
+            }
+            fill(0, 0, 0)
+            textSize(35)
+            textAlign(CENTER, CENTER)
+            text("Reset Defaults", 300, 300)
+            text("Back", 300, 350)
         }
     }
     fill(255, 255, 255, 2*bright)
@@ -432,6 +679,9 @@ function transitionScene () {
         bright += brightChange
         if (bright >= 100) {
             brightChange = -2
+            if (slowTrans) {
+                brightChange = -1
+            }
             if (transTo === 1) {
                 restart()
                 gameState = 1
@@ -442,11 +692,31 @@ function transitionScene () {
             }
             if (transTo === 0) {
                 restart()
+                transTo = undefined
+                gameRunning = false
+            }
+            if (menuTo === 0) {
+                menuRoom = 0
+                menuTo = undefined
+            }
+            if (menuTo === 1) {
+                menuRoom = 1
+                menuTo = undefined
+            }
+            if (menuTo === 2) {
+                menuRoom = 2
+                menuTo = undefined
+                gameRunning = true
+            }
+            if (menuTo === 3) {
+                menuRoom = 3
+                menuTo = undefined
             }
         }
-        if (bright <= 0 && brightChange === -2) {
+        if (bright <= 0 && brightChange < 0) {
             bright = 0
             brightChange = 2
+            slowTrans = false
             isTransitioning = false
         }
     }
@@ -877,6 +1147,18 @@ function passPowEffects () {
     }
 }
 
+function passTutorial () {
+    tutorialTimer ++
+    if (keyIsDown && (keyCode === 38 || keyCode === 37 || keyCode === 40 || keyCode === 39 || keyCode === 87 || keyCode === 65 || keyCode === 83 || keyCode === 68) && tutorialStage === 0) {
+        tutorialStage = 1
+        if (tutorialTimer >= 500) {
+            tutorialTimer = 0
+        } else {
+            tutorialTimer = -250
+        }
+    }
+}
+
 function checkNextWave () {
     if (gameLevel === 0) {
         if (level0Trans[waveNum-1] === undefined) {
@@ -965,6 +1247,18 @@ function updateETypeCount () {
     })
 }
 
+function drawBrightness () {
+    noStroke()
+    if (brightness === "Dark") {
+        fill(0, 0, 0, 50)
+        rect(0, 0, 600, 600)
+    }
+    if (brightness === "Moody") {
+        fill(0, 0, 0, 100)
+        rect(0, 0, 600, 600)
+    }
+}
+
 function restart () {
     player = {x:300, y:300, xVel:0, yVel:0, health:100, gunType:0, bulletTimer:0, iFrames: 0, regenTime: 100, speedBoost: 0, speedTimer: 0}
     waveNum = 1
@@ -972,6 +1266,8 @@ function restart () {
     bullets = []
     gameState = 0
     gameRunning = false
+    tutorialTimer = 0
+    tutorialStage = 0
 }
 
 //Makes canvas and is useful for debugging
@@ -981,10 +1277,18 @@ function setup () {
 
 //Runs repeatedly, most important stuff happens here
 function draw () {
-    background(255-Math.round(Math.random()*((100-player.health)/33)), 255-Math.round(Math.random()*((100-player.health)/33)), 255-Math.round(Math.random()*((100-player.health)/33)))
+    if (flashing === "Enabled") {
+        background(255-Math.round(Math.random()*((100-player.health)/20)), 255-Math.round(Math.random()*((100-player.health)/20)), 255-Math.round(Math.random()*((100-player.health)/20)))
+    } else {
+        background(255, 255, 255)
+    }
     
     if (gameRunning) {
-        translate((2 * Math.random() * rumble) - rumble, (2 * Math.random() * rumble) - rumble)
+        if (rumbleFX === "Regular") {
+            translate((2 * Math.random() * rumble) - rumble, (2 * Math.random() * rumble) - rumble)
+        } else if (rumbleFX === "Low") {
+            translate((Math.random() * rumble) - rumble/2, (Math.random() * rumble) - rumble/2)
+        }
         passRumble()
     }
 
@@ -1021,7 +1325,9 @@ function draw () {
         passPlayerIFrames()
         passPowEffects()
 
-        checkNextWave()
+        if (gameState === 1) {
+            checkNextWave()
+        }
     }
 
     transitionScene()
@@ -1036,21 +1342,15 @@ function draw () {
     trimBullets()
     trimEnemies()
     trimPowerups()
+
+    drawBrightness()
 }
 
 function keyTyped () {
-    if (keyCode === 32) {
-        if (gameRunning === false && gameState === 1) {
-            gameRunning = true
-            gameState = 1
-        } else if (gameState === 2) {
-            transTo = 0
-            isTransitioning = true
-        } else {
-            gameRunning = false
-        }
+    if (keyCode === 32 && gameState === 1) {
+        gameRunning = false
     }
-    if (keyCode === 75) {
+    if (keyCode === 75 && gameState === 1) {
         player.health = 0
         player.iFrames = 50
         console.log("Player killed.")
@@ -1069,5 +1369,130 @@ function playerShoot () {
             rumble += 3
         }
         player.bulletTimer = playerReload[player.gunType]
+    }
+}
+
+function mouseClicked () {
+    if (gameState === 0) {
+        if (menuRoom === 0) {
+            if (mouseX >= 175 && mouseX <= 425 && mouseY >= 275 && mouseY <= 325 && !isTransitioning) {
+                transTo = 0
+                menuTo = 1
+                isTransitioning = true
+            }
+            if (mouseX >= 200 && mouseX <= 400 && mouseY >= 350 && mouseY <= 400 && !isTransitioning) {
+                transTo = 0
+                menuTo = 2
+                isTransitioning = true
+            }
+            if (mouseX >= 200 && mouseX <= 400 && mouseY >= 425 && mouseY <= 475 && !isTransitioning) {
+                transTo = 0
+                menuTo = 3
+                isTransitioning = true
+            }
+        } else if (menuRoom === 1) {
+            if (calcDist(mouseX, mouseY, 300, 300) <= 37 && !isTransitioning) {
+                isTransitioning = true
+                transTo = 1
+            }
+            if (mouseX >= 200 && mouseX <= 400 && mouseY >= 160 && mouseY <= 190 && !isTransitioning) {
+                isTransitioning = true
+                menuTo = 0
+                transTo = 0
+            }
+            if (mouseX >= 200 && mouseX <= 225 && mouseY >= 285 && mouseY <= 315 && !isTransitioning) {
+                if (gameLevel === 1) {
+                    gameLevel = 5
+                } else {
+                    gameLevel --
+                }
+            }
+            if (mouseX >= 375 && mouseX <= 400 && mouseY >= 285 && mouseY <= 315 && !isTransitioning) {
+                if (gameLevel === 5) {
+                    gameLevel = 1
+                } else {
+                    gameLevel ++
+                }
+            }
+        } else if (menuRoom === 2) {
+            if (tutorialStage === 1) {
+                tutorialStage = 2
+                if (tutorialTimer >= 500) {
+                    tutorialTimer = 0
+                } else if (tutorialTimer < 0)  {
+                    tutorialTimer = -500
+                } else {
+                    tutorialTimer = -250
+                }
+            }
+        } else if (menuRoom === 3) {
+            if (mouseX >= 250 && mouseX <= 350 && mouseY >= 325 && mouseY <= 375 && !isTransitioning) {
+                transTo = 0
+                menuTo = 0
+                isTransitioning = true
+            }
+            if (mouseX >= 250 && mouseX <= 350 && mouseY >= 275 && mouseY <= 325 && !isTransitioning) {
+                volume = 5
+                rumbleFX = "Regular"
+                brightness = "Regular"
+                flashing = "Enabled"
+            }
+            if (mouseX >= 400 && mouseX <= 450 && mouseY >= 155 && mouseY <= 180) {
+                if (volume < 10) {
+                    volume ++
+                } else {
+                    volume = 0
+                }
+            }
+            if (mouseX >= 400 && mouseX <= 450 && mouseY >= 195 && mouseY <= 205) {
+                if (rumbleFX === "Regular") {
+                    rumbleFX = "None"
+                } else if (rumbleFX === "None") {
+                    rumbleFX = "Low"
+                } else if (rumbleFX === "Low") {
+                    rumbleFX = "Regular"
+                }
+            }
+            if (mouseX >= 400 && mouseX <= 450 && mouseY >= 220 && mouseY <= 230) {
+                if (brightness === "Regular") {
+                    brightness = "Moody"
+                } else if (brightness === "Moody") {
+                    brightness = "Dark"
+                } else if (brightness === "Dark") {
+                    brightness = "Regular"
+                }
+            }
+            if (mouseX >= 400 && mouseX <= 450 && mouseY >= 245 && mouseY <= 270) {
+                if (flashing === "Enabled") {
+                    flashing = "Disabled"
+                } else if (flashing === "Disabled") {
+                    flashing = "Enabled"
+                }
+            }
+        }
+    } else if (gameState === 1) {
+        if (!gameRunning) {
+            if (mouseX >= 230 && mouseX <= 470 && mouseY >= 230 && mouseY <= 370) {
+                gameRunning = true
+            }
+            if (mouseX >= 200 && mouseX <= 400 && mouseY >= 280 && mouseY <= 320) {
+                transTo = 1
+                isTransitioning = true
+            }
+            if (mouseX >= 200 && mouseX <= 400 && mouseY >= 330 && mouseY <= 370) {
+                transTo = 0
+                menuTo = 0
+                isTransitioning = true
+            }
+        }
+    } else if (gameState === 2) {
+        if (mouseX >= 150 && mouseX <= 450 && mouseY >= 280 && mouseY <= 320) {
+            transTo = 1
+            isTransitioning = true
+        }
+        if (mouseX >= 150 && mouseX <= 450 && mouseY >= 330 && mouseY <= 370) {
+            transTo = 0
+            isTransitioning = true
+        }
     }
 }
