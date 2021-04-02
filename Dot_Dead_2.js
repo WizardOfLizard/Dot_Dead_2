@@ -46,9 +46,11 @@ let defeated = [false, false, false, false, false, false]
 let bulletSpeed = 6
 
 let playerSpeed = 5
+//player guns: 0:default, 1:machine gun 2:sniper, 3:shotgun, 4:heavy cannon 
 let playerReload = [30, 5, 55, 35, 60]
 let playerBulletDamage = [30, 5, 50, 20, 80]
 
+// enemy types: 0:regular, 1:speedster, 2:sniper, 3:shotgunner, 4:elite, 5:tank, 6:bomber, 7:gunner
 let enemySpeed = [3, 6, 2, 3, 3, 2, 3, 1]
 let enemyReload = [55, 35, 80, 60, 55, 65, 100, 80]
 let enemyHealth = [30, 20, 40, 60, 80, 100, 40, 55]
@@ -166,7 +168,9 @@ function trimBullets () {
 function trimPowerups () {
     if (powers.length >= 1) {
         powers = powers.filter(power => {
-            power.lifetime ++
+            if (gameRunning) {
+                power.lifetime ++
+            }
             if (power.lifetime <= 250) {
                 return true
             } else {
@@ -293,9 +297,24 @@ function drawEnemies () {
             }
             if (enemy.stat === "alive") {
                 ellipse(enemy.x, enemy.y, 25, 25)
+                noStroke()
+                if (enemy.bulletTimer <= 15 && flashing === "Enabled") {
+                    fill(255, 255, 255, 50 * (enemy.bulletTimer % 5))
+                    ellipse(enemy.x, enemy.y, 25, 25)
+                }
                 if (enemy.type === 4) {
                     fill (0, 0, 0, 100)
                     ellipse(enemy.x, enemy.y, 30, 30)
+                }
+                if (enemy.health < enemyHealth[enemy.type]) {
+                    /*
+                    fill(0, 0, 0)
+                    rect(enemy.x - 10, enemy.y - 16, 20, 2)
+                    */
+                    fill(255, 0, 0)
+                    rect(enemy.x - 10, enemy.y - 16, 20, 2)
+                    fill(35, 194, 45)
+                    rect(enemy.x - 10, enemy.y - 16, (enemy.health/enemyHealth[enemy.type]) * 20, 2)
                 }
             }
         })
@@ -316,6 +335,37 @@ function drawPowerups () {
             fill(184, 2, 2, 255 - power.lifetime)
         }
         ellipse(power.x, power.y, 15, 15)
+        if (power.type === "health") {
+            fill(0, 0, 0, 255 - power.lifetime)
+            textSize(15)
+            textAlign(CENTER, CENTER)
+            text("+", power.x, power.y + 1)
+        }
+        if (power.type === "speed") {
+            fill(0, 0, 0, 255 - power.lifetime)
+            beginShape();
+            vertex(power.x + 2.75, power.y - 5);
+            vertex(power.x - 3.5, power.y + 1.5);
+            vertex(power.x - 1.25, power.y + 1.5);
+            vertex(power.x - 2.75, power.y + 5);
+            vertex(power.x + 2.75, power.y)
+            vertex(power.x, power.y)
+            endShape(CLOSE);
+        }
+        if (power.type === "gun") {
+            fill(0, 0, 0, 255 - power.lifetime)
+            ellipse(power.x, power.y, 9, 9)
+            fill(184, 2, 2, 255 - power.lifetime)
+            ellipse(power.x, power.y, 7, 7)
+            textSize(20)
+            textAlign(CENTER, CENTER)
+            text("+", power.x, power.y + 1)
+            fill(0, 0, 0, 255 - power.lifetime)
+            textSize(19)
+            text("+", power.x, power.y + 1)
+            fill(184, 2, 2, 255 - power.lifetime)
+            ellipse(power.x, power.y, 4, 4)
+        }
     })
 }
 
@@ -326,11 +376,40 @@ function drawBullets () {
         bullets.forEach(bullet => {
             if (bullet.stat === "live") {
                 if (bullet.affil === "friend") {
+                    if (bullet.type === 2) {
+                        for(let i = 0;i < 150;i ++) {
+                            fill(7, 172, 232, 5)
+                            ellipse(bullet.x - (Math.cos(bullet.ang) * i / 4), bullet.y - (Math.sin(bullet.ang) * i / 4), 12 - (i / 15), 12 - (i / 15))
+                        }
+                    }
                     fill(35, 194, 45)
                 } else {
+                    if (bullet.type === 2) {
+                        for(let i = 0;i < 150;i ++) {
+                            fill(147, 20, 201, 5)
+                            ellipse(bullet.x - (Math.cos(bullet.ang) * i / 4), bullet.y - (Math.sin(bullet.ang) * i / 4), 12 - (i / 15), 12 - (i / 15))
+                        }
+                    }
                     fill(227, 127, 14)
+                    if (bullet.type === 1) {
+                        fill(8, 150, 12)
+                    } else if (bullet.type === 2) {
+                        fill(186, 11, 11)
+                    } else if (bullet.type === 3) {
+                        fill(199, 187, 14)
+                    } else if (bullet.type === 5) {
+                        fill(120, 7, 109)
+                    } else if (bullet.type === 6) {
+                        fill(4, 255, 0)
+                    } else if (bullet.type === 7) {
+                        fill(0, 0, 0)
+                    }
                 }
                 ellipse(bullet.x, bullet.y, 10, 10)
+                if (bullet.type === 4) {
+                    fill(0, 0, 0, 50)
+                    ellipse(bullet.x, bullet.y, 12, 12)
+                }
             }
         })
     }
@@ -1033,6 +1112,12 @@ function moveBullets () {
         if (bullet.affil === "foe" && bullet.type === 6) {
             bullet.x += bulletSpeed*Math.cos(bullet.ang)/2
             bullet.y += bulletSpeed*Math.sin(bullet.ang)/2
+        } else if (bullet.affil === "foe" && bullet.type === 2) {
+            bullet.x += bulletSpeed*Math.cos(bullet.ang)*1.2
+            bullet.y += bulletSpeed*Math.sin(bullet.ang)*1.2
+        } else if (bullet.affil === "friend" && bullet.type === 2) {
+            bullet.x += bulletSpeed*Math.cos(bullet.ang)*1.5
+            bullet.y += bulletSpeed*Math.sin(bullet.ang)*1.5
         } else if (bullet.affil === "friend" && bullet.type === 4) {
             bullet.x += bulletSpeed*Math.cos(bullet.ang)/1.25
             bullet.y += bulletSpeed*Math.sin(bullet.ang)/1.25
@@ -1277,6 +1362,7 @@ function setup () {
 
 //Runs repeatedly, most important stuff happens here
 function draw () {
+
     if (flashing === "Enabled") {
         background(255-Math.round(Math.random()*((100-player.health)/20)), 255-Math.round(Math.random()*((100-player.health)/20)), 255-Math.round(Math.random()*((100-player.health)/20)))
     } else {
@@ -1355,6 +1441,18 @@ function keyTyped () {
         player.iFrames = 50
         console.log("Player killed.")
     }
+    if (keyCode === 49 && gameState === 1) {
+        player.gunType = 1
+    }
+    if (keyCode === 50 && gameState === 1) {
+        player.gunType = 2
+    }
+    if (keyCode === 51 && gameState === 1) {
+        player.gunType = 3
+    }
+    if (keyCode === 52 && gameState === 1) {
+        player.gunType = 4
+    }
 }
 
 //called when player clicks, spawns a bullet
@@ -1367,6 +1465,9 @@ function playerShoot () {
         }
         if (player.gunType === 4) {
             rumble += 3
+        }
+        if (player.gunType === 1) {
+            rumble -= 0.3
         }
         player.bulletTimer = playerReload[player.gunType]
     }
