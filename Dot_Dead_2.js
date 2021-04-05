@@ -1008,7 +1008,7 @@ function movePlayer () {
 
 function moveEnemies () {
     if (!isTransitioning) {
-        enemies.forEach(enemy => {
+        enemies.forEach((enemy, id) => {
             if (enemy.state === "move0A") {
                 enemy.rangeFloor = 200
                 enemy.rangeCeiling = 300
@@ -1030,14 +1030,14 @@ function moveEnemies () {
                 enemy.rangeCeiling = 250
             }
             if (enemy.state === "move2A") {
-                enemy.rangeFloor = 400
-                enemy.rangeCeiling = 500
+                enemy.rangeFloor = 375
+                enemy.rangeCeiling = 425
             } else if (enemy.state === "move2B") {
                 enemy.rangeFloor = 350
-                enemy.rangeCeiling = 450
+                enemy.rangeCeiling = 400
             } else if (enemy.state === "move2C") {
-                enemy.rangeFloor = 475
-                enemy.rangeCeiling = 575
+                enemy.rangeFloor = 400
+                enemy.rangeCeiling = 450
             }
             if (enemy.state === "move3A") {
                 enemy.rangeFloor = 100
@@ -1073,35 +1073,65 @@ function moveEnemies () {
                 enemy.rangeFloor = 450
                 enemy.rangeCeiling = 550
             }
-            //moves enemy closer if player leaves ideal range
-            if (calcDist(enemy.x, enemy.y, player.x, player.y) > enemy.rangeCeiling) {
+            let moved = false
+            enemies.forEach((ally, id2) => {
+                if (!moved && id !== id2) {
+                    if (calcDist(enemy.x, enemy.y, ally.x, ally.y) < 25) {
+                        if (enemy.x < ally.x && enemy.x > 50) {
+                            enemy.x -= enemySpeed[enemy.type]
+                            moved = true
+                        }
+                        if (enemy.x > ally.x && enemy.x < 550) {
+                            enemy.x += enemySpeed[enemy.type]
+                            moved = true
+                        }
+                        if (enemy.y < ally.y && enemy.y > 50) {
+                            enemy.y -= enemySpeed[enemy.type]
+                            moved = true
+                        }
+                        if (enemy.y > ally.y && enemy.y < 550) {
+                            enemy.y += enemySpeed[enemy.type]
+                            moved = true
+                        }
+                    }
+                }
+            })
+            if (calcDist(enemy.x, enemy.y, player.x, player.y) > enemy.rangeCeiling && !moved) {
                 if (enemy.x < player.x) {
                     enemy.x += enemySpeed[enemy.type]
+                    moved = true
                 }
                 if (enemy.x > player.x) {
                     enemy.x -= enemySpeed[enemy.type]
+                    moved = true
                 }
                 if (enemy.y < player.y) {
                     enemy.y += enemySpeed[enemy.type]
+                    moved = true
                 }
                 if (enemy.y > player.y) {
                     enemy.y -= enemySpeed[enemy.type]
+                    moved = true
                 }
             }
-            // moves enemy back if player comes too close
-            if (calcDist(enemy.x, enemy.y, player.x, player.y) < enemy.rangeFloor) {
+            if (calcDist(enemy.x, enemy.y, player.x, player.y) < enemy.rangeFloor && !moved) {
                 if (enemy.x < player.x && enemy.x > 50) {
                     enemy.x -= enemySpeed[enemy.type]
+                    moved = true
                 }
                 if (enemy.x > player.x && enemy.x < 550) {
                     enemy.x += enemySpeed[enemy.type]
+                    moved = true
                 }
                 if (enemy.y < player.y && enemy.y > 50) {
                     enemy.y -= enemySpeed[enemy.type]
+                    moved = true
                 }
                 if (enemy.y > player.y && enemy.y < 550) {
                     enemy.y += enemySpeed[enemy.type]
+                    moved = true
                 }
+            } else {
             }
         })
     }
