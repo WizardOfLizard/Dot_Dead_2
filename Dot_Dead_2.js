@@ -28,7 +28,7 @@ let brightness = "Regular"
 let flashing = "Enabled"
 
 //integer representing the level being played/selected in menu
-let gameLevel = 0
+let gameLevel = 1
 
 //string
 //options: campaign/level
@@ -70,7 +70,7 @@ let enemyReload = [55, 35, 80, 60, 55, 65, 100, 80]
 //list of health maximums
 let enemyHealth = [30, 20, 40, 60, 80, 100, 40, 55]
 //list of bullet damages
-let enemyBulletDamage = [20, 15, 35, 20, 20, 15, 40, 10]
+let enemyBulletDamage = [20, 15, 35, 20, 20, 15, 35, 10]
 //list of each enemy type's likelyhood of dropping a given powerup
 let enemyPowChance = [{health:0.1, speed:0.1, gun:0.05}, {health:0.1, speed:0.2, gun:0.1}, {health:0.15, speed:0.15, gun:0.1}, {health:0.2, speed:0.1, gun:0.1}, {health:0.2, speed:0.2, gun:0.15}, {health:0.3, speed:0.05, gun:0.1}, {health:0.15, speed:0.05, gun:0.2}, {health:0.15, speed:0.1, gun:0.2}]
 
@@ -304,11 +304,101 @@ function spawnWave (wave, level) {
             spawnGroup(2, 5)
         }
     } else if (level === 3) {
-
+        if (wave === 1) {
+            spawnGroup(2, 0)
+            spawnGroup(2, 1)
+        } else if (wave === 2) {
+            spawnGroup(2, 0)
+            spawnGroup(1, 3)
+        } else if (wave === 3) {
+            spawnGroup(2, 3)
+            spawnGroup(1, 2)
+        } else if (wave === 4) {
+            spawnGroup(3, 3)
+        } else if (wave === 5) {
+            spawnGroup(2, 4)
+            spawnGroup(1, 2)
+        } else if (wave === 6) {
+            spawnGroup(2, 4)
+            spawnGroup(2, 3)
+        } else if (wave === 7) {
+            spawnGroup(2, 1)
+            spawnGroup(2, 3)
+        } else if (wave === 8) {
+            spawnGroup(2, 4)
+            spawnGroup(1, 1)
+            spawnGroup(1, 3)
+        } else if (wave === 9) {
+            spawnGroup(3, 4)
+            spawnGroup(2, 3)
+            spawnGroup(2, 2)
+        }
     } else if (level === 4) {
-
+        if (wave === 1) {
+            spawnGroup(2, 6)
+        } else if (wave === 2) {
+            spawnGroup(1, 6)
+            spawnGroup(2, 4)
+        } else if (wave === 3) {
+            spawnGroup(1, 6)
+            spawnGroup(2, 2)
+        } else if (wave === 4) {
+            spawnGroup(1, 6)
+            spawnGroup(3, 1)
+        } else if (wave === 5) {
+            spawnGroup(2, 4)
+            spawnGroup(1, 7)
+        } else if (wave === 6) {
+            spawnGroup(2, 5)
+            spawnGroup(2, 7)
+        } else if (wave === 7) {
+            spawnGroup(1, 7)
+            spawnGroup(1, 2)
+            spawnGroup(2, 4)
+        } else if (wave === 8) {
+            spawnGroup(1, 7)
+            spawnGroup(2, 6)
+        } else if (wave === 9) {
+            spawnGroup(2, 7)
+            spawnGroup(2, 6)
+            spawnGroup(1, 4)
+        }
     } else if (level === 5) {
-
+        if (wave === 1) {
+            spawnGroup(2, 3)
+            spawnGroup(2, 1)
+        } else if (wave === 2) {
+            spawnGroup(2, 2)
+            spawnGroup(2, 4)
+        } else if (wave === 3) {
+            spawnGroup(2, 5)
+            spawnGroup(2, 7)
+        } else if (wave === 4) {
+            spawnGroup(2, 6)
+            spawnGroup(2, 4)
+        } else if (wave === 5) {
+            spawnGroup(5, 0)
+            spawnGroup(3, 4)
+        } else if (wave === 6) {
+            spawnGroup(2, 5)
+            spawnGroup(2, 1)
+            spawnGroup(2, 2)
+        } else if (wave === 7) {
+            spawnGroup(2, 7)
+            spawnGroup(1, 6)
+            spawnGroup(2, 3)
+        } else if (wave === 8) {
+            spawnGroup(1, 6)
+            spawnGroup(1, 1)
+            spawnGroup(1, 3)
+            spawnGroup(2, 4)
+        } else if (wave === 9) {
+            spawnGroup(1, 5)
+            spawnGroup(2, 7)
+            spawnGroup(2, 2)
+            spawnGroup(1, 3)
+            spawnGroup(2, 4)
+        }
     }
 }
 
@@ -520,7 +610,7 @@ function drawUI () {
         }
         text(gunName + ": " + player.ammo, 300, 75)
     }
-    if (player.iFrames > 0) {
+    if (player.iFrames > 0 && healGlow <= 0) {
         fill(255, 0, 0, 2*player.iFrames)
         rect(0, 0, 600, 600)
     }
@@ -1139,8 +1229,8 @@ function moveEnemies () {
                 enemy.rangeCeiling = 450
             }
             if (enemy.state === "move3A") {
-                enemy.rangeFloor = 100
-                enemy.rangeCeiling = 125
+                enemy.rangeFloor = 175
+                enemy.rangeCeiling = 200
             } else if (enemy.state === "move3B") {
                 enemy.rangeFloor = 125
                 enemy.rangeCeiling = 150
@@ -1241,6 +1331,9 @@ function moveBullets () {
         if (bullet.affil === "foe" && bullet.type === 6) {
             bullet.x += bulletSpeed*Math.cos(bullet.ang)/2
             bullet.y += bulletSpeed*Math.sin(bullet.ang)/2
+        }else if (bullet.affil === "foe" && bullet.type === 7) {
+            bullet.x += bulletSpeed*Math.cos(bullet.ang)/1.2
+            bullet.y += bulletSpeed*Math.sin(bullet.ang)/1.2
         } else if (bullet.affil === "foe" && bullet.type === 2) {
             bullet.x += bulletSpeed*Math.cos(bullet.ang)*1.2
             bullet.y += bulletSpeed*Math.sin(bullet.ang)*1.2
@@ -1309,6 +1402,7 @@ function collidePowerups () {
         if(calcDist(power.x, power.y, player.x, player.y) <= 20) {
             if (power.type === "health") {
                 healGlow = 100
+                player.iFrames = 50
                 if (player.health >= 70) {
                     player.health = 100
                 } else {
