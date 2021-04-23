@@ -58,7 +58,7 @@ let playerSpeed = 5
 //list contining reload times 
 let playerReload = [30, 5, 55, 35, 60]
 //list containing damage dealt by bulets from gun
-let playerBulletDamage = [30, 5, 50, 20, 80]
+let playerBulletDamage = [30, 5, 50, 20, 100]
 //list containing ammo for each gun
 let playerAmmo = [10, 100, 8, 16, 5]
 
@@ -68,9 +68,9 @@ let enemySpeed = [3, 6, 2, 3, 3, 2, 3, 1]
 //list of reload times
 let enemyReload = [55, 35, 80, 60, 55, 65, 100, 80]
 //list of health maximums
-let enemyHealth = [30, 20, 40, 60, 80, 100, 40, 55]
+let enemyHealth = [30, 20, 40, 60, 60, 100, 40, 55]
 //list of bullet damages
-let enemyBulletDamage = [20, 15, 35, 20, 20, 15, 35, 10]
+let enemyBulletDamage = [20, 15, 30, 20, 20, 15, 20, 10]
 //list of each enemy type's likelyhood of dropping a given powerup
 let enemyPowChance = [{health:0.1, speed:0.1, gun:0.05}, {health:0.1, speed:0.2, gun:0.1}, {health:0.15, speed:0.15, gun:0.1}, {health:0.2, speed:0.1, gun:0.1}, {health:0.2, speed:0.2, gun:0.15}, {health:0.3, speed:0.05, gun:0.1}, {health:0.15, speed:0.05, gun:0.2}, {health:0.15, speed:0.1, gun:0.2}]
 
@@ -350,7 +350,7 @@ function spawnWave (wave, level) {
             spawnGroup(1, 7)
         } else if (wave === 6) {
             spawnGroup(2, 5)
-            spawnGroup(2, 7)
+            spawnGroup(1, 7)
         } else if (wave === 7) {
             spawnGroup(1, 7)
             spawnGroup(1, 2)
@@ -359,7 +359,7 @@ function spawnWave (wave, level) {
             spawnGroup(1, 7)
             spawnGroup(2, 6)
         } else if (wave === 9) {
-            spawnGroup(2, 7)
+            spawnGroup(1, 7)
             spawnGroup(2, 6)
             spawnGroup(1, 4)
         }
@@ -371,21 +371,21 @@ function spawnWave (wave, level) {
             spawnGroup(2, 2)
             spawnGroup(2, 4)
         } else if (wave === 3) {
-            spawnGroup(2, 5)
-            spawnGroup(2, 7)
+            spawnGroup(3, 5)
+            spawnGroup(1, 7)
         } else if (wave === 4) {
             spawnGroup(2, 6)
             spawnGroup(2, 4)
         } else if (wave === 5) {
-            spawnGroup(5, 0)
+            spawnGroup(3, 0)
             spawnGroup(3, 4)
         } else if (wave === 6) {
             spawnGroup(2, 5)
             spawnGroup(2, 1)
             spawnGroup(2, 2)
         } else if (wave === 7) {
-            spawnGroup(2, 7)
-            spawnGroup(1, 6)
+            spawnGroup(1, 7)
+            spawnGroup(2, 6)
             spawnGroup(2, 3)
         } else if (wave === 8) {
             spawnGroup(1, 6)
@@ -393,8 +393,8 @@ function spawnWave (wave, level) {
             spawnGroup(1, 3)
             spawnGroup(2, 4)
         } else if (wave === 9) {
-            spawnGroup(1, 5)
-            spawnGroup(2, 7)
+            spawnGroup(2, 5)
+            spawnGroup(1, 7)
             spawnGroup(2, 2)
             spawnGroup(1, 3)
             spawnGroup(2, 4)
@@ -621,6 +621,81 @@ function drawUI () {
     if (healGlow > 0) {
         fill(35, 194, 45, healGlow)
         rect(0, 0, 600, 600)
+    }
+    if (gameLevel === 1 && level1Trans[waveNum-1] === undefined) {
+        if (enemies.length <= 0) {
+            if (playType === "Campaign") {
+                fill(0, 0, 0)
+                textAlign(CENTER, CENTER)
+                textSize(40)
+                text(`Level ${gameLevel} complete, on to level ${gameLevel+1}`, 300, 250)
+            } else {
+                fill(0, 0, 0)
+                textAlign(CENTER, CENTER)
+                textSize(40)
+                text(`Level ${gameLevel} complete`, 300, 250)
+            }
+        }
+    }
+    if (gameLevel === 2 && level2Trans[waveNum-1] === undefined) {
+        if (enemies.length <= 0) {
+            if (playType === "Campaign") {
+                fill(0, 0, 0)
+                textAlign(CENTER, CENTER)
+                textSize(40)
+                text(`Level ${gameLevel} complete, on to level ${gameLevel+1}`, 300, 250)
+            } else {
+                fill(0, 0, 0)
+                textAlign(CENTER, CENTER)
+                textSize(40)
+                text(`Level ${gameLevel} complete`, 300, 250)
+            }
+        }
+    }
+    if (gameLevel === 3 && level3Trans[waveNum-1] === undefined) {
+        if (enemies.length <= 0) {
+            if (playType === "Campaign") {
+                fill(0, 0, 0)
+                textAlign(CENTER, CENTER)
+                textSize(40)
+                text(`Level ${gameLevel} complete, on to level ${gameLevel+1}`, 300, 250)
+            } else {
+                fill(0, 0, 0)
+                textAlign(CENTER, CENTER)
+                textSize(40)
+                text(`Level ${gameLevel} complete`, 300, 250)
+            }
+        }
+    }
+    if (gameLevel === 4 && level4Trans[waveNum-1] === undefined) {
+        if (enemies.length <= 0) {
+            if (playType === "Campaign") {
+                fill(0, 0, 0)
+                textAlign(CENTER, CENTER)
+                textSize(40)
+                text(`Level ${gameLevel} complete, on to level ${gameLevel+1}`, 300, 250)
+            } else {
+                fill(0, 0, 0)
+                textAlign(CENTER, CENTER)
+                textSize(40)
+                text(`Level ${gameLevel} complete`, 300, 250)
+            }
+        }
+    }
+    if (gameLevel === 5 && level5Trans[waveNum-1] === undefined) {
+        if (enemies.length <= 0) {
+            if (playType === "Campaign") {
+                fill(0, 0, 0)
+                textAlign(CENTER, CENTER)
+                textSize(40)
+                text(`Campaign mode complete`, 300, 250)
+            } else {
+                fill(0, 0, 0)
+                textAlign(CENTER, CENTER)
+                textSize(40)
+                text(`Level ${gameLevel} complete`, 300, 250)
+            }
+        }
     }
     if (gameState === 0) {
         fill(150, 150, 150, 100)
@@ -960,6 +1035,8 @@ function transitionScene () {
             if (menuTo === 0) {
                 menuRoom = 0
                 menuTo = undefined
+                playType = undefined
+                gameLevel = 1
             }
             if (menuTo === 1) {
                 menuRoom = 1
@@ -1329,8 +1406,8 @@ function moveEnemies () {
 function moveBullets () {
     bullets.forEach(bullet => {
         if (bullet.affil === "foe" && bullet.type === 6) {
-            bullet.x += bulletSpeed*Math.cos(bullet.ang)/2
-            bullet.y += bulletSpeed*Math.sin(bullet.ang)/2
+            bullet.x += bulletSpeed*Math.cos(bullet.ang)/1.25
+            bullet.y += bulletSpeed*Math.sin(bullet.ang)/1.25
         }else if (bullet.affil === "foe" && bullet.type === 7) {
             bullet.x += bulletSpeed*Math.cos(bullet.ang)/1.2
             bullet.y += bulletSpeed*Math.sin(bullet.ang)/1.2
@@ -1347,6 +1424,10 @@ function moveBullets () {
             bullet.x += bulletSpeed*Math.cos(bullet.ang)
             bullet.y += bulletSpeed*Math.sin(bullet.ang)
         }
+        if (bullet.affil === "friend") {
+            bullet.x += bulletSpeed*Math.cos(bullet.ang)*0.25
+            bullet.y += bulletSpeed*Math.sin(bullet.ang)*0.25
+        }
     })
 }
 
@@ -1361,7 +1442,7 @@ function driftPowUps () {
 
 function playerRegen () {
     if (player.health > 0 && gameRunning && player.health < 100) {
-        player.regenTime --
+        player.regenTime -= 2
         if (player.regenTime <= 0) {
             player.health ++
             player.regenTime = 100
@@ -1414,8 +1495,12 @@ function collidePowerups () {
                 player.speedTimer = 150
             }
             if (power.type === "gun") {
-                player.gunType = power.gun
-                player.ammo = playerAmmo[power.gun]
+                if (player.gunType !== 0) {
+                    player.ammo = playerAmmo[player.gunType]
+                } else {
+                    player.gunType = power.gun
+                    player.ammo = playerAmmo[power.gun]
+                }
             }
             power.lifetime = 9999999
         }
@@ -1471,112 +1556,152 @@ function passTutorial () {
 }
 
 function checkNextWave () {
-    if (gameLevel === 0) {
-        if (level0Trans[waveNum-1] === undefined) {
-            if (enemies.length <= 0) {
-                defeated[gameLevel] = true
-                isTransitioning = true
-                transTo = 0
+    if (!isTransitioning) {
+        if (gameLevel === 0) {
+            if (level0Trans[waveNum-1] === undefined) {
+                if (enemies.length <= 0) {
+                    defeated[gameLevel] = true
+                    isTransitioning = true
+                    transTo = 0
+                    slowTrans= true
+                }
+            } else if(level0Trans[waveNum-1].type === "all") {
+                if (enemies.length <= level0Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
+            }  else {
+                if (eTypeCount[level0Trans[waveNum-1].type] <= level0Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
             }
-        } else if(level0Trans[waveNum-1].type === "all") {
-            if (enemies.length <= level0Trans[waveNum-1].num) {
-                waveNum ++
-                spawnWave(waveNum, gameLevel)
+        } else if (gameLevel === 1) {
+            if (level1Trans[waveNum-1] === undefined) {
+                if (enemies.length <= 0) {
+                    if (playType === "Campaign") {
+                        defeated[gameLevel] = true
+                        isTransitioning = true
+                        transTo = 1
+                        gameLevel ++
+                        slowTrans= true
+                    } else {
+                        defeated[gameLevel] = true
+                        isTransitioning = true
+                        transTo = 0
+                        slowTrans= true
+                    }
+                }
+            } else if(level1Trans[waveNum-1].type === "all") {
+                if (enemies.length <= level1Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
+            }  else {
+                if (eTypeCount[level1Trans[waveNum-1].type] <= level1Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
             }
-        }  else {
-            if (eTypeCount[level0Trans[waveNum-1].type] <= level0Trans[waveNum-1].num) {
-                waveNum ++
-                spawnWave(waveNum, gameLevel)
+        } else if (gameLevel === 2) {
+            if (level2Trans[waveNum-1] === undefined) {
+                if (enemies.length <= 0) {
+                    if (playType === "Campaign") {
+                        defeated[gameLevel] = true
+                        isTransitioning = true
+                        transTo = 1
+                        gameLevel ++
+                        slowTrans= true
+                    } else {
+                        defeated[gameLevel] = true
+                        isTransitioning = true
+                        transTo = 0
+                        slowTrans= true
+                    }
+                }
+            } else if(level2Trans[waveNum-1].type === "all") {
+                if (enemies.length <= level2Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
+            }  else {
+                if (eTypeCount[level2Trans[waveNum-1].type] <= level2Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
             }
-        }
-    } else if (gameLevel === 1) {
-        if (level1Trans[waveNum-1] === undefined) {
-            if (enemies.length <= 0) {
-                defeated[gameLevel] = true
-                isTransitioning = true
-                transTo = 0
+        } else if (gameLevel === 3) {
+            if (level3Trans[waveNum-1] === undefined) {
+                if (enemies.length <= 0) {
+                    if (playType === "Campaign") {
+                        defeated[gameLevel] = true
+                        isTransitioning = true
+                        transTo = 1
+                        gameLevel ++
+                        slowTrans= true
+                    } else {
+                        defeated[gameLevel] = true
+                        isTransitioning = true
+                        transTo = 0
+                        slowTrans= true
+                    }
+                }
+            } else if(level3Trans[waveNum-1].type === "all") {
+                if (enemies.length <= level3Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
+            }  else {
+                if (eTypeCount[level3Trans[waveNum-1].type] <= level3Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
             }
-        } else if(level1Trans[waveNum-1].type === "all") {
-            if (enemies.length <= level1Trans[waveNum-1].num) {
-                waveNum ++
-                spawnWave(waveNum, gameLevel)
+        } else if (gameLevel === 4) {
+            if (level4Trans[waveNum-1] === undefined) {
+                if (enemies.length <= 0) {
+                    if (playType === "Campaign") {
+                        defeated[gameLevel] = true
+                        isTransitioning = true
+                        transTo = 1
+                        gameLevel ++
+                        slowTrans= true
+                    } else {
+                        defeated[gameLevel] = true
+                        isTransitioning = true
+                        transTo = 0
+                        slowTrans= true
+                    }
+                }
+            } else if(level4Trans[waveNum-1].type === "all") {
+                if (enemies.length <= level4Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
+            }  else {
+                if (eTypeCount[level4Trans[waveNum-1].type] <= level4Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
             }
-        }  else {
-            if (eTypeCount[level1Trans[waveNum-1].type] <= level1Trans[waveNum-1].num) {
-                waveNum ++
-                spawnWave(waveNum, gameLevel)
-            }
-        }
-    } else if (gameLevel === 2) {
-        if (level2Trans[waveNum-1] === undefined) {
-            if (enemies.length <= 0) {
-                defeated[gameLevel] = true
-                isTransitioning = true
-                transTo = 0
-            }
-        } else if(level2Trans[waveNum-1].type === "all") {
-            if (enemies.length <= level2Trans[waveNum-1].num) {
-                waveNum ++
-                spawnWave(waveNum, gameLevel)
-            }
-        }  else {
-            if (eTypeCount[level2Trans[waveNum-1].type] <= level2Trans[waveNum-1].num) {
-                waveNum ++
-                spawnWave(waveNum, gameLevel)
-            }
-        }
-    } else if (gameLevel === 3) {
-        if (level3Trans[waveNum-1] === undefined) {
-            if (enemies.length <= 0) {
-                defeated[gameLevel] = true
-                isTransitioning = true
-                transTo = 0
-            }
-        } else if(level3Trans[waveNum-1].type === "all") {
-            if (enemies.length <= level3Trans[waveNum-1].num) {
-                waveNum ++
-                spawnWave(waveNum, gameLevel)
-            }
-        }  else {
-            if (eTypeCount[level3Trans[waveNum-1].type] <= level3Trans[waveNum-1].num) {
-                waveNum ++
-                spawnWave(waveNum, gameLevel)
-            }
-        }
-    } else if (gameLevel === 4) {
-        if (level4Trans[waveNum-1] === undefined) {
-            if (enemies.length <= 0) {
-                defeated[gameLevel] = true
-                isTransitioning = true
-                transTo = 0
-            }
-        } else if(level4Trans[waveNum-1].type === "all") {
-            if (enemies.length <= level4Trans[waveNum-1].num) {
-                waveNum ++
-                spawnWave(waveNum, gameLevel)
-            }
-        }  else {
-            if (eTypeCount[level4Trans[waveNum-1].type] <= level4Trans[waveNum-1].num) {
-                waveNum ++
-                spawnWave(waveNum, gameLevel)
-            }
-        }
-    } else if (gameLevel === 5) {
-        if (level5Trans[waveNum-1] === undefined) {
-            if (enemies.length <= 0) {
-                defeated[gameLevel] = true
-                isTransitioning = true
-                transTo = 0
-            }
-        } else if(level5Trans[waveNum-1].type === "all") {
-            if (enemies.length <= level5Trans[waveNum-1].num) {
-                waveNum ++
-                spawnWave(waveNum, gameLevel)
-            }
-        }  else {
-            if (eTypeCount[level5Trans[waveNum-1].type] <= level5Trans[waveNum-1].num) {
-                waveNum ++
-                spawnWave(waveNum, gameLevel)
+        } else if (gameLevel === 5) {
+            if (level5Trans[waveNum-1] === undefined) {
+                if (enemies.length <= 0) {
+                    defeated[gameLevel] = true
+                    isTransitioning = true
+                    transTo = 0
+                    slowTrans= true
+                }
+            } else if(level5Trans[waveNum-1].type === "all") {
+                if (enemies.length <= level5Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
+            }  else {
+                if (eTypeCount[level5Trans[waveNum-1].type] <= level5Trans[waveNum-1].num) {
+                    waveNum ++
+                    spawnWave(waveNum, gameLevel)
+                }
             }
         }
     }
@@ -1700,6 +1825,8 @@ function draw () {
         if (gameState === 1) {
             checkNextWave()
         }
+
+        console.log(playType)
     }
 
     transitionScene()
@@ -1729,16 +1856,16 @@ function keyTyped () {
         console.log("Player killed.")
     }
     if (keyCode === 49 && gameState === 1) {
-        player.gunType = 1
+        spawnPowerup(player.x, player.y, "gun", 1)
     }
     if (keyCode === 50 && gameState === 1) {
-        player.gunType = 2
+        spawnPowerup(player.x, player.y, "gun", 2)
     }
     if (keyCode === 51 && gameState === 1) {
-        player.gunType = 3
+        spawnPowerup(player.x, player.y, "gun", 3)
     }
     if (keyCode === 52 && gameState === 1) {
-        player.gunType = 4
+        spawnPowerup(player.x, player.y, "gun", 4)
     }
 }
 
@@ -1753,12 +1880,22 @@ function playerShoot () {
                 spawnBullet(player.x, player.y, calcAngle(player.x, player.y, mouseX, mouseY) - Math.PI/10, "friend", player.gunType)
             }
             if (player.gunType === 4) {
+                spawnBullet(player.x, player.y, calcAngle(player.x, player.y, mouseX, mouseY) - 0.1 + (Math.random()*0.2), "friend", player.gunType)
+                spawnBullet(player.x, player.y, calcAngle(player.x, player.y, mouseX, mouseY) - 0.1 + (Math.random()*0.2), "friend", player.gunType)
+                spawnBullet(player.x, player.y, calcAngle(player.x, player.y, mouseX, mouseY) - 0.1 + (Math.random()*0.2), "friend", player.gunType)
+                spawnBullet(player.x, player.y, calcAngle(player.x, player.y, mouseX, mouseY) - 0.1 + (Math.random()*0.2), "friend", player.gunType)
+            }
+            if (player.gunType === 4) {
                 rumble += 3
             }
             if (player.gunType === 1) {
                 rumble -= 0.3
             }
-            player.bulletTimer = playerReload[player.gunType]
+            if (player.speedBoost > 0) {
+                player.bulletTimer = Math.round(playerReload[player.gunType]/2)
+            } else {
+                player.bulletTimer = playerReload[player.gunType]
+            }
         }
     }
 }
@@ -1766,6 +1903,11 @@ function playerShoot () {
 function mouseClicked () {
     if (gameState === 0) {
         if (menuRoom === 0) {
+            if (mouseX >= 175 && mouseX <= 425 && mouseY >= 200 && mouseY <= 250 && !isTransitioning) {
+                transTo = 1
+                isTransitioning = true
+                playType = "Campaign"
+            }
             if (mouseX >= 175 && mouseX <= 425 && mouseY >= 275 && mouseY <= 325 && !isTransitioning) {
                 transTo = 0
                 menuTo = 1
