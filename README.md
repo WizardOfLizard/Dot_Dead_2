@@ -1,18 +1,25 @@
 # Dot_Dead
 
-*Note*  When you are injured, the background slightly flickers.  It is not much, but if you are at risk to epilleptic seizures, be aware.
+How to start and play:
+-Open the downloaded folder 'Dot Dead 2'
+-Open 'Dot_Dead_2.html' in browser (Chrome works best)
+-Select menu items with mouse
+-Use arrow keys or WASD to move around
+-Hold down mouse to shoot towards your cursor
 
-Dot Dead is a very simple top-down shooter.
-You are a blue dot.
-There are red dots.
-The red dots hate your guts.
-They will shoot orange bullets at you to kill you.
-You can shoot green bullets back at them.
-You have three lives and must survive endless waves of red dots.
-Good luck.
+Effects List (This game contains a few features that could potentially result in seizure, this is unlikely, but still a possibility):
+*Disable or reduce any of these effects in the 'Settings' portion of the menu*
+    -Screen Shake: Elements on the screen shake when weapons are fired or when you take damage
+    -Slight Flashing: The background flickers slightly, inversely proportional to how much health you have, and enemies flash before shooting
+    -Sounds: There are several sound effects in the game, and the tab can grow loud
 
---Controls--
+~~Credits~~
+Scripting by Daniel L. Hensler
+Music/Sound Effects by Daniel L. Hensler
+P5 Javascript Web-Library created by Lauren Lee McCarthy, currently led by Moria Turner
 
-WASD or Arrow Keys move the player.
-Click to shoot your bullets, they travel from you in the direction of your mouse.
-Use space to start, stop, pause, or restart the game.
+Special Thanks:
+Timothy Padjen
+Colin Lyp
+Kent Allison
+Rebbecca Hensler

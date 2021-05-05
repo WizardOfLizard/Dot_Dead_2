@@ -27,6 +27,60 @@ let brightness = "Regular"
 //string:Disabled/Enabled[default]
 let flashing = "Enabled"
 
+//defines sound files
+function playShoot1 () {
+    let regShoot = new Audio('Sounds/Shoot_1.wav')
+    regShoot.volume = volume/10
+    regShoot.play()
+}
+function playShoot2 () {
+    let machineShoot = new Audio('Sounds/Shoot_2.wav')
+    machineShoot.volume = volume/10
+    machineShoot.play()
+}
+function playEnemyRapid () {
+    let rapid = new Audio('Sounds/Enemy_Rapid_Shoot.wav')
+    rapid.volume = volume/10
+    rapid.play()
+}
+function playExplode () {
+    let explode = new Audio('Sounds/Explosion_Sound.wav')
+    explode.volume = volume/10
+    explode.play()
+}
+function playerDamage () {
+    let damageSound = new Audio('Sounds/Damage_Sound.wav')
+    damageSound.volume = volume/10
+    damageSound.play()
+}
+function enemyDamage () {
+    let eDamageSound = new Audio('Sounds/Enemy_Damage_Sound.wav')
+    eDamageSound.volume = volume/10
+    eDamageSound.play()
+}
+function playPowUp () {
+    let powUpSound = new Audio('Sounds/PowUp_Sound.wav')
+    powUpSound.volume = volume/10
+    powUpSound.play()
+}
+function playTrans () {
+    let transSound = new Audio('Sounds/Transition_Sound.wav')
+    transSound.volume = volume/10
+    transSound.play()
+}
+function playTransL () {
+    let transSoundL = new Audio('Sounds/Transition_Sound(Long).wav')
+    transSoundL.volume = volume/10
+    transSoundL.play()
+}
+function playClick () {
+    let click = new Audio('Sounds/Click.wav')
+    click.volume = volume/10
+    click.play()
+}
+
+let tutSound = false
+
 //integer representing the level being played/selected in menu
 let gameLevel = 1
 
@@ -114,14 +168,6 @@ let powers = []
 //bullets contains the positions, trajectories, affiliations, statuses, and types of all bullets
 //Format: {x:number, y:number, ang:number(angle), afil:friend/foe, stat:live/dead, type:number}
 let bullets = []
-
-//seekers contains the positions, directions, affiliations, statuses, and types of all seekers
-//Format: {x:number, y:number, ang:number(angle), afil:friend/foe, stat:live/dead, type:string
-let seekers = []
-
-//lasers contains the start points, angles, affiliations, statuses, and types of all lasers
-//Format: {startX:number, startY:number, ang:number(angle), afil:friend/foe, stat:live/dead, type:string
-let lasers = []
 
 //calculates angle between two points. range[3pi/2, -pi/2)
 function calcAngle (p1x, p1y, p2x, p2y) {
@@ -508,14 +554,14 @@ function drawPowerups () {
         }
         if (power.type === "speed") {
             fill(0, 0, 0, 255 - power.lifetime)
-            beginShape();
-            vertex(power.x + 2.75, power.y - 5);
-            vertex(power.x - 3.5, power.y + 1.5);
-            vertex(power.x - 1.25, power.y + 1.5);
-            vertex(power.x - 2.75, power.y + 5);
+            beginShape()
+            vertex(power.x + 2.75, power.y - 5)
+            vertex(power.x - 3.5, power.y + 1.5)
+            vertex(power.x - 1.25, power.y + 1.5)
+            vertex(power.x - 2.75, power.y + 5)
             vertex(power.x + 2.75, power.y)
             vertex(power.x, power.y)
-            endShape(CLOSE);
+            endShape(CLOSE)
         }
         if (power.type === "gun") {
             fill(0, 0, 0, 255 - power.lifetime)
@@ -628,12 +674,12 @@ function drawUI () {
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
                 textSize(40)
-                text(`Level ${gameLevel} complete, on to level ${gameLevel+1}`, 300, 250)
+                text(`Level 1 complete, on to level 2`, 300, 250)
             } else {
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
                 textSize(40)
-                text(`Level ${gameLevel} complete`, 300, 250)
+                text(`Level 1 complete`, 300, 250)
             }
         }
     }
@@ -643,12 +689,12 @@ function drawUI () {
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
                 textSize(40)
-                text(`Level ${gameLevel} complete, on to level ${gameLevel+1}`, 300, 250)
+                text(`Level 2 complete, on to level 3`, 300, 250)
             } else {
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
                 textSize(40)
-                text(`Level ${gameLevel} complete`, 300, 250)
+                text(`Level 2 complete`, 300, 250)
             }
         }
     }
@@ -658,12 +704,12 @@ function drawUI () {
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
                 textSize(40)
-                text(`Level ${gameLevel} complete, on to level ${gameLevel+1}`, 300, 250)
+                text(`Level 3 complete, on to level 4`, 300, 250)
             } else {
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
                 textSize(40)
-                text(`Level ${gameLevel} complete`, 300, 250)
+                text(`Level 3 complete`, 300, 250)
             }
         }
     }
@@ -673,12 +719,12 @@ function drawUI () {
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
                 textSize(40)
-                text(`Level ${gameLevel} complete, on to level ${gameLevel+1}`, 300, 250)
+                text(`Level 4 complete, on to level 5`, 300, 250)
             } else {
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
                 textSize(40)
-                text(`Level ${gameLevel} complete`, 300, 250)
+                text(`Level 4 complete`, 300, 250)
             }
         }
     }
@@ -693,7 +739,7 @@ function drawUI () {
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
                 textSize(40)
-                text(`Level ${gameLevel} complete`, 300, 250)
+                text(`Level 5 complete`, 300, 250)
             }
         }
     }
@@ -913,6 +959,10 @@ function drawMenu () {
                     brightChange = 1
                     slowTrans = true
                     isTransitioning = true
+                    if (!tutSound) {
+                        playTransL()
+                        tutSound = true
+                    }
                 } else if (tutorialTimer >= 500) {
                     tutorialMessage = "Go out, prove your worth, defeat your enemies."
                 } else if (tutorialTimer >= 250) {
@@ -930,6 +980,7 @@ function drawMenu () {
                     transTo = 0
                     menuTo = 0
                     isTransitioning = true
+                    playTrans()
                 }
             }
             text(tutorialMessage, 50, 175 - textShift/2, 500)
@@ -1008,7 +1059,7 @@ function drawMenu () {
     fill(255, 255, 255, 2*bright)
 }
 
-//continuously runs and changes the state of teh game when activated
+//continuously runs and changes the state of the game when activated
 function transitionScene () {
     if (isTransitioning) {
         noStroke()
@@ -1057,6 +1108,7 @@ function transitionScene () {
             brightChange = 2
             slowTrans = false
             isTransitioning = false
+            tutSound = false
         }
     }
 }
@@ -1201,6 +1253,7 @@ function enemiesShoot () {
         if (enemy.bulletTimer <= 0 && gameRunning && !isTransitioning) {
             if (enemy.type !== 6 && enemy.type !== 7) {
                 spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y), "foe", enemy.type)
+                playShoot1()
             }
             if (enemy.type === 3) {
                 spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) + Math.PI/6, "foe", enemy.type)
@@ -1219,6 +1272,7 @@ function enemiesShoot () {
         }
         if (enemy.type === 6 && enemy.state === "exploding" && gameRunning && !isTransitioning) {
             if (enemy.bulletTimer % 40 === 0) {
+                playExplode()
                 spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y), "foe", enemy.type)
                 spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) + Math.PI/3, "foe", enemy.type)
                 spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) - Math.PI/3, "foe", enemy.type)
@@ -1226,6 +1280,7 @@ function enemiesShoot () {
                 spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) - 2 * Math.PI/3, "foe", enemy.type)
                 spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) + Math.PI, "foe", enemy.type)
             } else if (enemy.bulletTimer % 20 === 0) {
+                playExplode()
                 spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) + Math.PI/6, "foe", enemy.type)
                 spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) + Math.PI/3 + Math.PI/6, "foe", enemy.type)
                 spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) - Math.PI/3 + Math.PI/6, "foe", enemy.type)
@@ -1239,6 +1294,7 @@ function enemiesShoot () {
         }
         if (enemy.type === 7 && enemy.state === "shooting" && gameRunning && !isTransitioning) {
             if (enemy.bulletTimer % 5 === 0) {
+                playEnemyRapid()
                 spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y) - Math.PI/6 + 2*Math.PI*Math.random()/6, "foe", enemy.type)
             } else if (enemy.bulletTimer < 30) {
                 enemy.state = "thinking"
@@ -1459,6 +1515,7 @@ function collideBullets () {
                         bullet.stat = "dead"
                         enemy.health -= playerBulletDamage[bullet.type]
                         rumble += 0.5
+                        enemyDamage()
                     }
                 })
                 if (bullet.affil === "foe" && calcDist(bullet.x, bullet.y, player.x, player.y) <= 23) {
@@ -1471,6 +1528,7 @@ function collideBullets () {
                         if (player.health < 0) {
                             player.health = 0
                         }
+                        playerDamage()
                     }
                 }
             }
@@ -1481,6 +1539,7 @@ function collideBullets () {
 function collidePowerups () {
     powers.forEach(power => {
         if(calcDist(power.x, power.y, player.x, player.y) <= 20) {
+            playPowUp()
             if (power.type === "health") {
                 healGlow = 100
                 player.iFrames = 50
@@ -1562,6 +1621,7 @@ function checkNextWave () {
                 if (enemies.length <= 0) {
                     defeated[gameLevel] = true
                     isTransitioning = true
+                    playTrans()
                     transTo = 0
                     slowTrans= true
                 }
@@ -1582,12 +1642,14 @@ function checkNextWave () {
                     if (playType === "Campaign") {
                         defeated[gameLevel] = true
                         isTransitioning = true
+                        playTrans()
                         transTo = 1
                         gameLevel ++
                         slowTrans= true
                     } else {
                         defeated[gameLevel] = true
                         isTransitioning = true
+                        playTrans()
                         transTo = 0
                         slowTrans= true
                     }
@@ -1609,12 +1671,14 @@ function checkNextWave () {
                     if (playType === "Campaign") {
                         defeated[gameLevel] = true
                         isTransitioning = true
+                        playTrans()
                         transTo = 1
                         gameLevel ++
                         slowTrans= true
                     } else {
                         defeated[gameLevel] = true
                         isTransitioning = true
+                        playTrans()
                         transTo = 0
                         slowTrans= true
                     }
@@ -1636,12 +1700,14 @@ function checkNextWave () {
                     if (playType === "Campaign") {
                         defeated[gameLevel] = true
                         isTransitioning = true
+                        playTrans()
                         transTo = 1
                         gameLevel ++
                         slowTrans= true
                     } else {
                         defeated[gameLevel] = true
                         isTransitioning = true
+                        playTrans()
                         transTo = 0
                         slowTrans= true
                     }
@@ -1663,12 +1729,14 @@ function checkNextWave () {
                     if (playType === "Campaign") {
                         defeated[gameLevel] = true
                         isTransitioning = true
+                        playTrans()
                         transTo = 1
                         gameLevel ++
                         slowTrans= true
                     } else {
                         defeated[gameLevel] = true
                         isTransitioning = true
+                        playTrans()
                         transTo = 0
                         slowTrans= true
                     }
@@ -1689,6 +1757,7 @@ function checkNextWave () {
                 if (enemies.length <= 0) {
                     defeated[gameLevel] = true
                     isTransitioning = true
+                    playTrans()
                     transTo = 0
                     slowTrans= true
                 }
@@ -1825,8 +1894,6 @@ function draw () {
         if (gameState === 1) {
             checkNextWave()
         }
-
-        console.log(playType)
     }
 
     transitionScene()
@@ -1873,6 +1940,11 @@ function keyTyped () {
 function playerShoot () {
     if (player.bulletTimer < 1 && gameRunning && mouseIsPressed && !isTransitioning) {
         if (player.gunType === 0 || player.ammo > 0) {
+            if (player.gunType === 1) {
+                playShoot2()
+            } else {
+                playShoot1()
+            }
             spawnBullet(player.x, player.y, calcAngle(player.x, player.y, mouseX, mouseY), "friend", player.gunType)
             player.ammo --
             if (player.gunType === 3) {
@@ -1906,36 +1978,49 @@ function mouseClicked () {
             if (mouseX >= 175 && mouseX <= 425 && mouseY >= 200 && mouseY <= 250 && !isTransitioning) {
                 transTo = 1
                 isTransitioning = true
+                playTrans()
+                playClick()
                 playType = "Campaign"
             }
             if (mouseX >= 175 && mouseX <= 425 && mouseY >= 275 && mouseY <= 325 && !isTransitioning) {
                 transTo = 0
                 menuTo = 1
                 isTransitioning = true
+                playTrans()
+                playClick()
                 playType = "Level"
             }
             if (mouseX >= 200 && mouseX <= 400 && mouseY >= 350 && mouseY <= 400 && !isTransitioning) {
                 transTo = 0
                 menuTo = 2
                 isTransitioning = true
+                playTrans()
+                playClick()
             }
             if (mouseX >= 200 && mouseX <= 400 && mouseY >= 425 && mouseY <= 475 && !isTransitioning) {
                 transTo = 0
                 menuTo = 3
                 isTransitioning = true
+                playTrans()
+                playClick()
             }
         } else if (menuRoom === 1) {
             if (calcDist(mouseX, mouseY, 300, 300) <= 37 && !isTransitioning) {
                 isTransitioning = true
+                playTrans()
+                playClick()
                 transTo = 1
             }
             if (mouseX >= 200 && mouseX <= 400 && mouseY >= 160 && mouseY <= 190 && !isTransitioning) {
                 isTransitioning = true
+                playTrans()
+                playClick()
                 menuTo = 0
                 transTo = 0
                 playType = undefined
             }
             if (mouseX >= 200 && mouseX <= 225 && mouseY >= 285 && mouseY <= 315 && !isTransitioning) {
+                playClick()
                 if (gameLevel === 1) {
                     gameLevel = 5
                 } else {
@@ -1943,6 +2028,7 @@ function mouseClicked () {
                 }
             }
             if (mouseX >= 375 && mouseX <= 400 && mouseY >= 285 && mouseY <= 315 && !isTransitioning) {
+                playClick()
                 if (gameLevel === 5) {
                     gameLevel = 1
                 } else {
@@ -1965,12 +2051,15 @@ function mouseClicked () {
                 transTo = 0
                 menuTo = 0
                 isTransitioning = true
+                playTrans()
+                playClick()
             }
             if (mouseX >= 250 && mouseX <= 350 && mouseY >= 275 && mouseY <= 325 && !isTransitioning) {
                 volume = 5
                 rumbleFX = "Regular"
                 brightness = "Regular"
                 flashing = "Enabled"
+                playClick()
             }
             if (mouseX >= 400 && mouseX <= 450 && mouseY >= 155 && mouseY <= 180) {
                 if (volume < 10) {
@@ -1978,8 +2067,10 @@ function mouseClicked () {
                 } else {
                     volume = 0
                 }
+                playClick()
             }
             if (mouseX >= 400 && mouseX <= 450 && mouseY >= 195 && mouseY <= 205) {
+                playClick()
                 if (rumbleFX === "Regular") {
                     rumbleFX = "None"
                 } else if (rumbleFX === "None") {
@@ -1989,6 +2080,7 @@ function mouseClicked () {
                 }
             }
             if (mouseX >= 400 && mouseX <= 450 && mouseY >= 220 && mouseY <= 230) {
+                playClick()
                 if (brightness === "Regular") {
                     brightness = "Moody"
                 } else if (brightness === "Moody") {
@@ -1998,6 +2090,7 @@ function mouseClicked () {
                 }
             }
             if (mouseX >= 400 && mouseX <= 450 && mouseY >= 245 && mouseY <= 270) {
+                playClick()
                 if (flashing === "Enabled") {
                     flashing = "Disabled"
                 } else if (flashing === "Disabled") {
@@ -2009,25 +2102,34 @@ function mouseClicked () {
         if (!gameRunning) {
             if (mouseX >= 230 && mouseX <= 470 && mouseY >= 230 && mouseY <= 370) {
                 gameRunning = true
+                playClick()
             }
             if (mouseX >= 200 && mouseX <= 400 && mouseY >= 280 && mouseY <= 320) {
                 transTo = 1
                 isTransitioning = true
+                playTrans()
+                playClick()
             }
             if (mouseX >= 200 && mouseX <= 400 && mouseY >= 330 && mouseY <= 370) {
                 transTo = 0
                 menuTo = 0
                 isTransitioning = true
+                playTrans()
+                playClick()
             }
         }
     } else if (gameState === 2) {
         if (mouseX >= 150 && mouseX <= 450 && mouseY >= 280 && mouseY <= 320) {
             transTo = 1
             isTransitioning = true
+            playTrans()
+            playClick()
         }
         if (mouseX >= 150 && mouseX <= 450 && mouseY >= 330 && mouseY <= 370) {
             transTo = 0
             isTransitioning = true
+            playTrans()
+            playClick()
         }
     }
 }
