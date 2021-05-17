@@ -16,6 +16,7 @@ let menuRoom = 0
 let tutorialStage = 0
 //integer timing how long you have been on a given stage in the tutorial, allows the system to react to the player taking too long or going very fast
 let tutorialTimer = 0
+let tutorialCount = 0
 
 //settings
 //integer
@@ -79,6 +80,23 @@ function playClick () {
     click.play()
 }
 
+
+function minorConfigTweaks () {
+    let smil
+    let n
+    let frwn
+    let blank
+}
+
+minorConfigTweaks()
+
+function preload () {
+    smil = loadImage("https://i.postimg.cc/v8LLggYC/SmilDoor.png")
+    n = loadImage("https://i.postimg.cc/Jzx1dBVw/NDoor.png")
+    frwn = loadImage("https://i.postimg.cc/52sVmdLb/FrwnDoor.png")
+    blank = loadImage("https://i.postimg.cc/P5ZYXhrb/Blank.png")
+}
+
 let tutSound = false
 
 //integer representing the level being played/selected in menu
@@ -91,7 +109,7 @@ let playType = undefined
 //Lists the wave transitions for each level
 //Each item in array is a single wave transition
 //type:number/"all" (represents the type of enemy it is counting before next transition)
-//num:int (number it must be or b lower than to start next wave)
+//num:int (number it must be or be lower than to start next wave)
 let level0Trans = [{type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}]
 let level1Trans = [{type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}]
 let level2Trans = [{type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}, {type:"all", num:0}]
@@ -143,6 +161,7 @@ let brightChange = 2
 let transTo = undefined
 let menuTo = undefined
 let slowTrans = false
+let leaveTut = false
 
 //this controls intensity of healthpack afterglow
 let healGlow = 0
@@ -689,7 +708,7 @@ function drawUI () {
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
                 textSize(40)
-                text(`Level 2 complete, on to level 3`, 300, 250)
+                text(`Level 1 complete, on to level 2`, 300, 250)
             } else {
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
@@ -704,7 +723,7 @@ function drawUI () {
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
                 textSize(40)
-                text(`Level 3 complete, on to level 4`, 300, 250)
+                text(`Level 2 complete, on to level 3`, 300, 250)
             } else {
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
@@ -719,7 +738,7 @@ function drawUI () {
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
                 textSize(40)
-                text(`Level 4 complete, on to level 5`, 300, 250)
+                text(`Level 3 complete, on to level 4`, 300, 250)
             } else {
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
@@ -734,7 +753,11 @@ function drawUI () {
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
                 textSize(40)
-                text(`Campaign mode complete`, 300, 250)
+                if (transTo === 1) {
+                    text(`Level 3 complete, on to level 4`, 300, 250)
+                } else {
+                    text("Campaign mode complete", 300, 250)
+                }
             } else {
                 fill(0, 0, 0)
                 textAlign(CENTER, CENTER)
@@ -772,7 +795,11 @@ function drawUI () {
                 if (mouseX >= 150 && mouseX <= 450 && mouseY >= 275 && mouseY <= 325) {
                     fill(255, 255, 255, 10)
                     for(let i = 0 + calcDist(mouseX, mouseY, mouseX, 300);i < 100;i += 2) {
-                        ellipse(300, 300, 2*i, 0.75*i)
+                        if (playType === "Campaign") {
+                            ellipse(300, 300, 3.2*i, 0.75*i)
+                        } else {
+                            ellipse(300, 300, 2*i, 0.75*i)
+                        }
                     }
                 }
                 if (mouseX >= 150 && mouseX <= 450 && mouseY >= 325 && mouseY <= 400) {
@@ -784,7 +811,11 @@ function drawUI () {
                 fill(0, 0, 0)
                 textSize(30)
                 text("Resume", 300, 250)
-                text("Restart Level", 300, 300)
+                if (playType === "Campaign") {
+                    text("Restart Campaign", 300, 300)
+                } else {
+                    text("Restart Level", 300, 300)
+                }
                 text("Quit to Menu", 300, 350)
             } else {
                 fill(150, 150, 150, 100)
@@ -815,9 +846,14 @@ function drawUI () {
     }
 }
 
+let dmg = new Audio('secret/dmg.wav')
+
 //draws the home menu and tutorial
 function drawMenu () {
     if (gameState === 0) {
+        if (menuRoom !== 2) {
+            tutstart = false
+        }
         if (menuRoom === 0) {
             background(140, 140, 140)
             noStroke()
@@ -932,56 +968,252 @@ function drawMenu () {
             text("How to play", 300, 100+textShift)
             textSize(25)
             fill(173, 129, 5)
-            let tutorialMessage = "Hello."
-            if (tutorialStage === 0) {
-                if (tutorialTimer >= 1000) {
-                    tutorialMessage = "Umm, please move along now, it's not difficult..."
-                } else if (tutorialTimer >= 500) {
-                    tutorialMessage = "Now, please attempt to move using either the WASD keys or the Arrow keys."
-                } else if (tutorialTimer >= 250) {
-                    tutorialMessage = "It is good that you have come to learn..."
+            let tutorialMessage = "ERROR"
+            if (tutorialCount === 0) {
+                tutorialMessage = "Hello."
+                if (tutorialStage === 0) {
+                    if (tutorialTimer >= 1000) {
+                        tutorialMessage = "Umm, please move along now, it's not difficult..."
+                    } else if (tutorialTimer >= 500) {
+                        tutorialMessage = "Now, please attempt to move using either the WASD keys or the Arrow keys."
+                    } else if (tutorialTimer >= 250) {
+                        tutorialMessage = "It is good that you have come to learn..."
+                    }
+                } else if (tutorialStage === 1) {
+                    if (tutorialTimer >= 500) {
+                        tutorialMessage = "Now please attempt to shoot by clicking, you aim where your mouse is."
+                    } else if (tutorialTimer >= 250) {
+                        tutorialMessage = "Now moving is useful, but it is nowhere near enough to survive."
+                    } else if (tutorialTimer >= 0) {
+                        tutorialMessage = "Very good..."
+                    } else if (tutorialTimer >= -250) {
+                        tutorialMessage = "Ah, very eager I see..."
+                    }
+                } else if (tutorialStage === 2) {
+                    if (tutorialTimer >= 750) {
+                        tutorialMessage = "I will be watching with great interest..."
+                        transTo = 0
+                        menuTo = 0
+                        brightChange = 1
+                        slowTrans = true
+                        isTransitioning = true
+                        if (!tutSound) {
+                            playTransL()
+                            tutSound = true
+                            leaveTut = true
+                        }
+                    } else if (tutorialTimer >= 500) {
+                        tutorialMessage = "Go out, prove your worth, defeat your enemies."
+                    } else if (tutorialTimer >= 250) {
+                        tutorialMessage = "Now I suppose you are ready..."
+                    } else if (tutorialTimer >= 0) {
+                        tutorialMessage = "Excellent..."
+                    } else if (tutorialTimer >= -250) {
+                        tutorialMessage = "I see you're excited..."
+                    } else if (tutorialTimer >= -500) {
+                        tutorialMessage = "My, that was quick..."
+                    }
+                } else {
+                    tutorialMessage = "I have no clue how you got here.  Don't be afraid, I'll send you back."
+                    if (tutorialTimer >= 250) {
+                        transTo = 0
+                        menuTo = 0
+                        isTransitioning = true
+                        playTrans()
+                    }
                 }
-            } else if (tutorialStage === 1) {
-                if (tutorialTimer >= 500) {
-                    tutorialMessage = "Now please attempt to shoot by clicking, you aim where your mouse is."
-                } else if (tutorialTimer >= 250) {
-                    tutorialMessage = "Now moving is useful, but it is nowhere near enough to survive."
-                } else if (tutorialTimer >= 0) {
-                    tutorialMessage = "Very good..."
-                } else if (tutorialTimer >= -250) {
-                    tutorialMessage = "Ah, very eager I see..."
+            } else if (tutorialCount === 1) {
+                tutorialMessage = "Welcome back."
+                if (tutorialStage === 0) {
+                    if (tutorialTimer >= 1000) {
+                        tutorialMessage = "Insert interesting secret dialogue here."
+                    } else if (tutorialTimer >= 500) {
+                        tutorialMessage = "You have nothing else to learn, move using WASD or arrow keys"
+                    } else if (tutorialTimer >= 250) {
+                        tutorialMessage = "Are you here to visit me?"
+                    }
+                } else if (tutorialStage === 1) {
+                    if (tutorialTimer >= 500) {
+                        tutorialMessage = "Now please shoot your weapon and continue."
+                    } else if (tutorialTimer >= 250) {
+                        tutorialMessage = "Someone... that is best forgotten..."
+                    } else if (tutorialTimer >= 0) {
+                        tutorialMessage = "Now, watching you, you remind me of someone..."
+                    } else if (tutorialTimer >= -250) {
+                        tutorialMessage = "Oi!  Why even visit me if you won't listen to what I have to say?"
+                    }
+                } else if (tutorialStage === 2) {
+                    if (tutorialTimer >= 750) {
+                        tutorialMessage = "Beware the one who smiles"
+                        transTo = 0
+                        menuTo = 0
+                        brightChange = 1
+                        slowTrans = true
+                        isTransitioning = true
+                        if (!tutSound) {
+                            playTransL()
+                            tutSound = true
+                            leaveTut = true
+                        }
+                    } else if (tutorialTimer >= 500) {
+                        tutorialMessage = "Man, this is boring."
+                    } else if (tutorialTimer >= 250) {
+                        tutorialMessage = "Yadda yadda, you're ready and stuff."
+                    } else if (tutorialTimer >= 0) {
+                        tutorialMessage = "Feel free to visit again some time."
+                    } else if (tutorialTimer >= -250) {
+                        tutorialMessage = "My, my, in such a rush."
+                    } else if (tutorialTimer >= -500) {
+                        tutorialMessage = "Geez! Why do I even bother?  You must have hit it by mistake!"
+                        transTo = 0
+                        menuTo = 0
+                        isTransitioning = true
+                        if (!tutSound) {
+                            playTrans()
+                            tutSound = true
+                        }
+                    }
+                } else {
+                    tutorialMessage = "I have no clue how you got here.  Don't be afraid, I'll send you back."
+                    if (tutorialTimer >= 250) {
+                        transTo = 0
+                        menuTo = 0
+                        isTransitioning = true
+                        playTrans()
+                    }
                 }
-            } else if (tutorialStage === 2) {
-                if (tutorialTimer >= 750) {
-                    tutorialMessage = "I will be watching with great interest..."
+            } else if (tutorialCount === 2) {
+                let string = smil
+                tutorialMessage = "..."
+                if (tutorialStage === 1) {
+                    if (tutorialTimer >= 2000) {
+                        tutorialMessage = "Have a nice day."
+                        transTo = 0
+                        menuTo = 0
+                        brightChange = 1
+                        slowTrans = true
+                        isTransitioning = true
+                        if (!tutSound) {
+                            playTransL()
+                            tutSound = true
+                            leaveTut = true
+                        }
+                        string = blank
+                    } else if (tutorialTimer >= 1750) {
+                        tutorialMessage = "Thank you."
+                        string = blank
+                    } else if (tutorialTimer >= 1500) {
+                        tutorialMessage = "BEGONE!"
+                        string = blank
+                        if (rumble < 0.3) {
+                            rumble = 0.3
+                        }
+                    } else if (tutorialTimer >= 1250) {
+                        tutorialMessage = "Rah!"
+                        string = frwn
+                        if (rumble < 3) {
+                            rumble ++
+                        }
+                        dmg.volume = volume/10
+                        dmg.play()
+                    } else if (tutorialTimer >= 1000) {
+                        tutorialMessage = "Gah!"
+                        if (rumble < 1.5) {
+                            rumble += 0.2
+                        }
+                        string = n
+                        dmg.volume = volume/10
+                        dmg.play()
+                    } else if (tutorialTimer >= 750) {
+                        tutorialMessage = "I will destroy this... and finally give us peace."
+                    } else if (tutorialTimer >= 500) {
+                        tutorialMessage = "Thank you for understanding..."
+                    } else if (tutorialTimer >= 250) {
+                        tutorialMessage = "That door is not safe...  You don't want to know what... WHO is behind that door..."
+                    } else if (tutorialTimer >= 0) {
+                        tutorialMessage = "Wait! Don't enter that door!"
+                    } else if (tutorialTimer >= -250) {
+                        tutorialMessage = "WAIT!"
+                    }
+                }
+                image(string, 250, 250, 100, 100)
+                if (string === smil && player.x >= 275 && player.x <= 325 && player.y >= 250 && player.y <= 350) {
+                    location.href = "Secret/secret.html"
+                }
+            } else if (tutorialCount === 3) {
+                tutorialMessage = "Hello once again."
+                if (tutorialStage === 0) {
+                    if (tutorialTimer >= 1000) {
+                        tutorialMessage = "Oh?  You haven't moved?  Sorry, please move."
+                    } else if (tutorialTimer >= 500) {
+                        tutorialMessage = "You shouldn't have needed to see that."
+                    } else if (tutorialTimer >= 250) {
+                        tutorialMessage = "Terribly sorry about all that."
+                    }
+                } else if (tutorialStage === 1) {
+                    if (tutorialTimer >= 500) {
+                        tutorialMessage = "Thankfully, we won't ever have to deal with him again."
+                    } else if (tutorialTimer >= 250) {
+                        tutorialMessage = "To... HIM..."
+                    } else if (tutorialTimer >= 0) {
+                        tutorialMessage = "That door... it led somewhere..."
+                    } else if (tutorialTimer >= -250) {
+                        tutorialMessage = "It's understandable, you don't have to forgive me."
+                    }
+                } else if (tutorialStage === 2) {
+                    if (tutorialTimer >= 750) {
+                        tutorialMessage = "Stay safe..."
+                        transTo = 0
+                        menuTo = 0
+                        brightChange = 1
+                        slowTrans = true
+                        isTransitioning = true
+                        if (!tutSound) {
+                            playTransL()
+                            tutSound = true
+                            leaveTut = true
+                        }
+                    } else if (tutorialTimer >= 500) {
+                        tutorialMessage = "But I'm rambling, you should be off."
+                    } else if (tutorialTimer >= 250) {
+                        tutorialMessage = "It's really sad that he was corrupted so."
+                    } else if (tutorialTimer >= 0) {
+                        tutorialMessage = "It truly is a shame, you know?"
+                    } else if (tutorialTimer >= -250) {
+                        tutorialMessage = "Yes, I know it was bad, but it's over."
+                    } else if (tutorialTimer >= -500) {
+                        tutorialMessage = "Yes, I understand... Goodbye..."
+                        transTo = 0
+                        menuTo = 0
+                        isTransitioning = true
+                        slowTrans = true
+                        if (!tutSound) {
+                            playTransL()
+                            tutSound = true
+                            leaveTut = true
+                        }
+                    }
+                } else {
+                    tutorialMessage = "I have no clue how you got here.  Don't be afraid, I'll send you back."
+                    if (tutorialTimer >= 250) {
+                        transTo = 0
+                        menuTo = 0
+                        isTransitioning = true
+                        playTrans()
+                    }
+                }
+            } else if (tutorialCount === 4) {
+                tutorialMessage = "Please, just leave me alone..."
+                if (!isTransitioning) {
                     transTo = 0
                     menuTo = 0
-                    brightChange = 1
-                    slowTrans = true
                     isTransitioning = true
+                    slowTrans = true
                     if (!tutSound) {
                         playTransL()
                         tutSound = true
                     }
-                } else if (tutorialTimer >= 500) {
-                    tutorialMessage = "Go out, prove your worth, defeat your enemies."
-                } else if (tutorialTimer >= 250) {
-                    tutorialMessage = "Now I suppose you are ready..."
-                } else if (tutorialTimer >= 0) {
-                    tutorialMessage = "Excellent..."
-                } else if (tutorialTimer >= -250) {
-                    tutorialMessage = "I see you're excited..."
-                } else if (tutorialTimer >= -500) {
-                    tutorialMessage = "My, that was quick..."
-                }
-            } else {
-                tutorialMessage = "I have no clue how you got here.  Don't be afraid, I'll send you back."
-                if (tutorialTimer >= 250) {
-                    transTo = 0
-                    menuTo = 0
-                    isTransitioning = true
-                    playTrans()
-                }
+                }    
             }
             text(tutorialMessage, 50, 175 - textShift/2, 500)
             drawBullets()
@@ -1097,6 +1329,9 @@ function transitionScene () {
                 menuRoom = 2
                 menuTo = undefined
                 gameRunning = true
+                if (tutorialCount === 2) {
+                    player.y = 500
+                }
             }
             if (menuTo === 3) {
                 menuRoom = 3
@@ -1104,6 +1339,10 @@ function transitionScene () {
             }
         }
         if (bright <= 0 && brightChange < 0) {
+            if (leaveTut === true) {
+                leaveTut = false
+                tutorialCount ++
+            }
             bright = 0
             brightChange = 2
             slowTrans = false
@@ -1395,6 +1634,10 @@ function moveEnemies () {
                 enemy.rangeFloor = 450
                 enemy.rangeCeiling = 550
             }
+            if (enemy.state === "exploding" || enemy.state === "shooting") {
+                enemy.rangeFloor = 0
+                enemy.rangeCeiling = 9999
+            }
             let moved = false
             enemies.forEach((ally, id2) => {
                 if (!moved && id !== id2) {
@@ -1603,13 +1846,15 @@ function passPowEffects () {
 }
 
 function passTutorial () {
-    tutorialTimer ++
-    if (keyIsDown && (keyCode === 38 || keyCode === 37 || keyCode === 40 || keyCode === 39 || keyCode === 87 || keyCode === 65 || keyCode === 83 || keyCode === 68) && tutorialStage === 0) {
-        tutorialStage = 1
-        if (tutorialTimer >= 500) {
-            tutorialTimer = 0
-        } else {
-            tutorialTimer = -250
+    if (!isTransitioning) {
+        tutorialTimer ++
+        if (keyIsPressed && (keyCode === 38 || keyCode === 37 || keyCode === 40 || keyCode === 39 || keyCode === 87 || keyCode === 65 || keyCode === 83 || keyCode === 68) && tutorialStage === 0) {
+            tutorialStage = 1
+            if (tutorialTimer >= 500) {
+                tutorialTimer = 0
+            } else {
+                tutorialTimer = -250
+            }
         }
     }
 }
@@ -2037,13 +2282,15 @@ function mouseClicked () {
             }
         } else if (menuRoom === 2) {
             if (tutorialStage === 1) {
-                tutorialStage = 2
-                if (tutorialTimer >= 500) {
-                    tutorialTimer = 0
-                } else if (tutorialTimer < 0)  {
-                    tutorialTimer = -500
-                } else {
-                    tutorialTimer = -250
+                if (tutorialCount !== 2) {
+                    tutorialStage = 2
+                    if (tutorialTimer >= 500) {
+                        tutorialTimer = 0
+                    } else if (tutorialTimer < 0)  {
+                        tutorialTimer = -500
+                    } else {
+                        tutorialTimer = -250
+                    }
                 }
             }
         } else if (menuRoom === 3) {
@@ -2107,6 +2354,9 @@ function mouseClicked () {
             if (mouseX >= 200 && mouseX <= 400 && mouseY >= 280 && mouseY <= 320) {
                 transTo = 1
                 isTransitioning = true
+                if (playType === "Campaign") {
+                    gameLevel = 1
+                }
                 playTrans()
                 playClick()
             }
@@ -2122,6 +2372,9 @@ function mouseClicked () {
         if (mouseX >= 150 && mouseX <= 450 && mouseY >= 280 && mouseY <= 320) {
             transTo = 1
             isTransitioning = true
+            if (playType === "Campaign") {
+                gameLevel = 1
+            }
             playTrans()
             playClick()
         }

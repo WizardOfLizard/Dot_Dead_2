@@ -13,7 +13,7 @@ Effects List (This game contains a few features that could potentially result in
     -Slight Flashing: The background flickers slightly, inversely proportional to how much health you have, and enemies flash before shooting
     -Sounds: There are several sound effects in the game, and the tab can grow loud
 
-~~Credits~~
+~Credits~
 Scripting by Daniel L. Hensler
 Music/Sound Effects by Daniel L. Hensler
 P5 Javascript Web-Library created by Lauren Lee McCarthy, currently led by Moria Turner
@@ -22,4 +22,4 @@ Special Thanks:
 Timothy Padjen
 Colin Lyp
 Kent Allison
-Rebbecca Hensler
+Rebecca Hensler
