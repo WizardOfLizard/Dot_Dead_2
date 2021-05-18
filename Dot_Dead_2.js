@@ -2162,23 +2162,6 @@ function keyTyped () {
     if (keyCode === 32 && gameState === 1) {
         gameRunning = false
     }
-    if (keyCode === 75 && gameState === 1) {
-        player.health = 0
-        player.iFrames = 50
-        console.log("Player killed.")
-    }
-    if (keyCode === 49 && gameState === 1) {
-        spawnPowerup(player.x, player.y, "gun", 1)
-    }
-    if (keyCode === 50 && gameState === 1) {
-        spawnPowerup(player.x, player.y, "gun", 2)
-    }
-    if (keyCode === 51 && gameState === 1) {
-        spawnPowerup(player.x, player.y, "gun", 3)
-    }
-    if (keyCode === 52 && gameState === 1) {
-        spawnPowerup(player.x, player.y, "gun", 4)
-    }
 }
 
 //called when player clicks, spawns a bullet
